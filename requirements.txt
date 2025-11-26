@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+adbutils
+loguru
+python-multipart
+pyaxmlparser
+requests
