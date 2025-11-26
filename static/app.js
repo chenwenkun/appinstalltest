@@ -1,5 +1,5 @@
 let API_BASE = ""; // Default to relative if served locally, or we will override it
-const LOCAL_API = "http://127.0.0.1:8791";
+const LOCAL_API = ""; // Use relative path
 const SERVER_API = window.location.origin;
 let selectedDevice = null;
 let currentPackageName = null;
