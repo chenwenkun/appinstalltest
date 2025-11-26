@@ -274,8 +274,8 @@ tr:last-child td {
 /* Grid Layout for Dashboard */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 450px 1fr;
-    /* Widened sidebar */
+    grid-template-columns: 1000px 1fr;
+    /* Ultra-wide sidebar as requested */
     gap: 20px;
     height: calc(100vh - 100px);
     /* Adjust for header */
@@ -293,14 +293,15 @@ tr:last-child td {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    overflow-y: auto;
+    overflow: hidden;
+    /* Prevent main scroll, let children scroll */
     padding-bottom: 20px;
 }
 
 /* Logs Panel Override */
 .logs-panel {
-    height: 35vh;
-    /* Approx 1/3 of screen */
+    flex: 1;
+    /* Fill remaining space */
     min-height: 200px;
     display: flex;
     flex-direction: column;
@@ -312,9 +313,9 @@ tr:last-child td {
 
 /* APK List Panel Override */
 .apk-panel {
-    height: 30vh;
-    /* Approx 1/3 of screen */
-    min-height: 200px;
+    height: 300px;
+    /* Fixed height for ~3-4 items */
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
 }
