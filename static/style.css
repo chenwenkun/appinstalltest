@@ -293,6 +293,14 @@ tr:last-child td {
     margin-top: 1rem;
 }
 
+.mt-auto {
+    margin-top: auto;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
 .mb-4 {
     margin-bottom: 1rem;
 }
