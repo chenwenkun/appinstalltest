@@ -92,10 +92,10 @@ class ApkManager:
             }
             self._save_metadata()
 
-            return {"filename": filename, "status": "uploaded"}
+            return {"filename": filename, "status": "success"}
         except Exception as e:
             logger.error(f"Error saving APK: {e}")
-            return {"error": str(e)}
+            return {"status": "error", "message": str(e)}
 
     def delete_apk(self, filename):
         """Delete an APK file and its metadata."""
@@ -108,7 +108,7 @@ class ApkManager:
                 del self.metadata[filename]
                 self._save_metadata()
             
-            return {"status": "deleted", "filename": filename}
+            return {"status": "success", "filename": filename}
         except Exception as e:
             logger.error(f"Error deleting APK: {e}")
             return {"error": str(e)}
