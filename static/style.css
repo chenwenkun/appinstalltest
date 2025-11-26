@@ -274,8 +274,8 @@ tr:last-child td {
 /* Grid Layout for Dashboard */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 450px 1fr;
-    /* Revert to reasonable width */
+    grid-template-columns: 1fr 350px;
+    /* Left fills space, Right (Logs) is fixed 350px */
     gap: 15px;
     height: calc(100vh - 80px);
     /* Adjust for header */
@@ -301,8 +301,8 @@ tr:last-child td {
 
 /* Logs Panel Override */
 .logs-panel {
-    height: 350px;
-    /* Fixed height as requested */
+    height: 100%;
+    /* Fill entire right column */
     display: flex;
     flex-direction: column;
 }
