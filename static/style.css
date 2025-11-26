@@ -322,13 +322,17 @@ tr:last-child td {
 
 /* Card Overrides */
 .glass-card {
-    height: 100%;
-    /* Fill grid cell */
+    /* height: 100%; REMOVED to prevent Header expansion */
     display: flex;
     flex-direction: column;
     padding: 15px;
     margin-bottom: 0;
     /* Reset margin */
+}
+
+.dashboard-container .glass-card {
+    height: 100%;
+    /* Only dashboard cards should fill height */
 }
 
 /* Logs Panel */
