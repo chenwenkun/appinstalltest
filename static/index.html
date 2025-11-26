@@ -93,20 +93,29 @@
             const statusDiv = document.getElementById('status');
             try {
                 // Try to connect to local service
-                // If running locally, this is relative. If remote, it's localhost.
-                // We'll try localhost explicit first.
                 const res = await fetch('http://127.0.0.1:8791/devices');
                 if (res.ok) {
-                    statusDiv.innerHTML = '✅ 本地服务已启动，正在跳转...';
-                    statusDiv.style.background = '#d4edda';
-                    statusDiv.style.color = '#155724';
-                    statusDiv.style.borderColor = '#c3e6cb';
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
+                    const devices = await res.json();
+                    if (devices.length > 0) {
+                        statusDiv.innerHTML = '✅ 检测到本地设备，正在跳转...';
+                        statusDiv.style.background = '#d4edda';
+                        statusDiv.style.color = '#155724';
+                        statusDiv.style.borderColor = '#c3e6cb';
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                    } else {
+                        statusDiv.innerHTML = '⚠️ 本地服务已启动，但未检测到设备。请连接设备...';
+                        statusDiv.style.background = '#fff3cd';
+                        statusDiv.style.color = '#856404';
+                        statusDiv.style.borderColor = '#ffeeba';
+                    }
                 }
             } catch (e) {
-                statusDiv.innerHTML = '❌ 未检测到本地服务。请按照上述步骤启动服务后刷新页面。';
+                statusDiv.innerHTML = '❌ 未检测到本地服务。请启动服务并连接设备后刷新页面。';
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.style.borderColor = '#f5c6cb';
             }
         }
 
