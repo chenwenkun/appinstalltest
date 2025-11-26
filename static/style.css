@@ -336,6 +336,13 @@ tr:last-child td {
     font-size: 12px;
 }
 
+.log-container:focus {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: none;
+}
+
 /* Compact Upload Zone */
 .upload-zone {
     border: 2px dashed rgba(74, 144, 226, 0.4);
