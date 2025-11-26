@@ -24,8 +24,8 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Mount uploads directory to serve APKs
-os.makedirs("uploads", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+os.makedirs("apks", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="apks"), name="uploads")
 
 from fastapi.responses import RedirectResponse
 

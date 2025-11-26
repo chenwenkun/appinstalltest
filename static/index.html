@@ -57,27 +57,31 @@
 </head>
 
 <body>
-    <h1>uiauto.dev</h1>
-    <p>uiauto.dev帮助你快速编写App UI自动化脚本，它由网页端+客户端组成</p>
+    <h1>APK兼容性测试平台</h1>
+    <p>帮助你快速进行APK兼容性测试，支持旧版本安装、覆盖安装新版本、自动启动验证。</p>
     <ul>
-        <li>支持Android和iOS</li>
-        <li>支持鼠标选择控件查看属性，控件树辅助精确定位，生成选择器</li>
-        <li>支持找色功能，方向键微调坐标，获取RGB、HSB</li>
+        <li>支持 Android 设备</li>
+        <li>自动检测设备状态（屏幕、锁屏）</li>
+        <li>支持远程 APK 管理与分发</li>
+        <li>交互式测试流程（安装旧版 -> 覆盖新版）</li>
     </ul>
-    <p>QQ群: 536481989</p>
 
-    <h2>安装</h2>
+    <h2>安装与启动</h2>
     <div class="step">
-        <h3>1. 安装Python 3.8+</h3>
+        <h3>1. 获取代码</h3>
+        <pre><code>git clone https://github.com/chenwenkun/appinstalltest.git
+                cd appinstalltest</code></pre>
     </div>
     <div class="step">
-        <h3>2. 安装并启动</h3>
-        <pre><code>pip3 install -U uiautodev -i https://pypi.doubanio.com/simple
-
-                # or: python3 -m uiautodev</code></pre>
+        <h3>2. 安装依赖</h3>
+        <pre><code>pip install -r requirements.txt</code></pre>
+    </div>
+    <div class="step">
+        <h3>3. 启动服务</h3>
+        <pre><code>python main.py</code></pre>
     </div>
 
-    <p>uiauto.dev正常启动后，刷新网页即可访问本地页面。</p>
+    <p>服务启动后，刷新本页面即可自动跳转到控制台。</p>
 
     <div id="status"
         style="margin-top: 30px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; color: #856404;">
