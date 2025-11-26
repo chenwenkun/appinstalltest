@@ -7,12 +7,12 @@ class TestRunner:
     def __init__(self, device_manager):
         self.device_manager = device_manager
 
-    async def install_old_apk(self, serial, old_apk_name):
+    async def install_old_apk(self, serial, old_apk_name, apk_url=None):
         """
         Step 1: Install Old APK (Async wrapper)
         """
         from fastapi.concurrency import run_in_threadpool
-        return await run_in_threadpool(self._install_old_sync, serial, old_apk_name)
+        return await run_in_threadpool(self._install_old_sync, serial, old_apk_name, apk_url)
 
     def _install_old_sync(self, serial, old_apk_name, apk_url=None):
         """
@@ -142,6 +142,42 @@ class TestRunner:
             if temp_file_path and os.path.exists(temp_file_path):
                 logger.info(f"Cleaning up temporary APK file: {temp_file_path}")
                 os.remove(temp_file_path)
+
+    def _get_apk_path(self, apk_name, apk_url):
+        """
+        Resolve APK path.
+        If apk_url is provided, download it to a temp file.
+        If apk_name is provided, use local path.
+        Returns: (path, is_temp_file)
+        """
+        if apk_url:
+            import requests
+            import tempfile
+            
+            logger.info(f"Downloading APK from {apk_url}...")
+            try:
+                # Create a temp file
+                fd, temp_path = tempfile.mkstemp(suffix=".apk")
+                os.close(fd)
+                
+                with requests.get(apk_url, stream=True) as r:
+                    r.raise_for_status()
+                    with open(temp_path, 'wb') as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                
+                logger.info(f"Downloaded to {temp_path}")
+                return temp_path, True
+            except Exception as e:
+                logger.error(f"Failed to download APK: {e}")
+                raise Exception(f"Failed to download APK from {apk_url}: {e}")
+
+        elif apk_name:
+            apk_path = os.path.join("apks", apk_name)
+            return apk_path, False
+        
+        else:
+            raise ValueError("Neither apk_name nor apk_url provided")
 
     def _get_apk_info(self, apk_path):
         try:

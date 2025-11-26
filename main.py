@@ -27,10 +27,16 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+from fastapi.responses import RedirectResponse
+
 # Initialize managers
 device_manager = DeviceManager()
 apk_manager = ApkManager("apks")
 test_runner = TestRunner(device_manager)
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/static/index.html")
 
 
 
