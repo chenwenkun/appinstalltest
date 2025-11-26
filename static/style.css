@@ -301,8 +301,8 @@ tr:last-child td {
 
 /* Logs Panel Override */
 .logs-panel {
-    height: 100%;
-    /* Fill entire right column */
+    height: 350px;
+    /* Fixed height as requested */
     display: flex;
     flex-direction: column;
 }
