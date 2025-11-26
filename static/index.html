@@ -4,88 +4,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APK兼容性测试 - 帮助</title>
+    <title>APK兼容性测试平台</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
             max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
+            width: 100%;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            margin-top: 30px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
+        .step-card {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
         }
 
         code {
-            background: #f4f4f4;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-
-        pre {
-            background: #f4f4f4;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-
-        .btn {
-            display: inline-block;
-            background: #0078d7;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
-
-        .btn:hover {
-            background: #0063b1;
+            display: block;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 5px;
+            font-family: 'JetBrains Mono', monospace;
         }
     </style>
 </head>
 
 <body>
-    <h1>APK兼容性测试平台</h1>
-    <p>帮助你快速进行APK兼容性测试，支持旧版本安装、覆盖安装新版本、自动启动验证。</p>
-    <ul>
-        <li>支持 Android 设备</li>
-        <li>自动检测设备状态（屏幕、锁屏）</li>
-        <li>支持远程 APK 管理与分发</li>
-        <li>交互式测试流程（安装旧版 -> 覆盖新版）</li>
-    </ul>
+    <div class="container glass-card">
+        <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined" style="font-size: 48px; color: var(--primary-color);">android</span>
+            <div>
+                <h1 style="margin:0;">APK兼容性测试平台</h1>
+                <p style="margin:0;">快速、自动化的 Android 应用兼容性测试工具</p>
+            </div>
+        </div>
 
-    <h2>安装与启动</h2>
-    <div class="step">
-        <h3>1. 获取代码</h3>
-        <pre><code>git clone https://github.com/chenwenkun/appinstalltest.git
-                cd appinstalltest</code></pre>
-    </div>
-    <div class="step">
-        <h3>2. 安装依赖</h3>
-        <pre><code>pip install -r requirements.txt</code></pre>
-    </div>
-    <div class="step">
-        <h3>3. 启动服务</h3>
-        <pre><code>python main.py</code></pre>
-    </div>
+        <div class="flex gap-4" style="margin-bottom: 30px;">
+            <div class="step-card flex-1">
+                <h3><span class="material-symbols-outlined" style="vertical-align: bottom;">devices</span> 设备管理</h3>
+                <p>自动检测设备连接状态、屏幕亮度和锁屏状态。</p>
+            </div>
+            <div class="step-card flex-1">
+                <h3><span class="material-symbols-outlined" style="vertical-align: bottom;">cloud_upload</span> 远程分发
+                </h3>
+                <p>统一管理 APK 文件，支持远程下载和安装。</p>
+            </div>
+            <div class="step-card flex-1">
+                <h3><span class="material-symbols-outlined" style="vertical-align: bottom;">play_arrow</span> 交互测试</h3>
+                <p>一键执行“旧版安装 -> 启动 -> 新版覆盖”流程。</p>
+            </div>
+        </div>
 
-    <p>服务启动后，刷新本页面即可自动跳转到控制台。</p>
+        <h2>快速开始</h2>
 
-    <div id="status"
-        style="margin-top: 30px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; color: #856404;">
-        正在检测本地服务...
+        <div class="step-card">
+            <h3>1. 获取代码</h3>
+            <code>git clone https://github.com/chenwenkun/appinstalltest.git
+                cd appinstalltest</code>
+        </div>
+        <div class="step-card">
+            <h3>2. 安装依赖</h3>
+            <code>pip install -r requirements.txt</code>
+        </div>
+        <div class="step-card">
+            <h3>3. 启动服务</h3>
+            <code>python main.py</code>
+        </div>
+
+        <div id="status" class="glass-card"
+            style="margin-top: 30px; text-align: center; background: rgba(255,243,205,0.6); border-color: rgba(255,238,186,0.6);">
+            <span class="material-symbols-outlined spinner" style="vertical-align: middle; color: #856404;">sync</span>
+            <span style="color: #856404; font-weight: 500;">正在检测本地服务...</span>
+        </div>
     </div>
 
     <script>
@@ -97,25 +96,22 @@
                 if (res.ok) {
                     const devices = await res.json();
                     if (devices.length > 0) {
-                        statusDiv.innerHTML = '✅ 检测到本地设备，正在跳转...';
-                        statusDiv.style.background = '#d4edda';
-                        statusDiv.style.color = '#155724';
-                        statusDiv.style.borderColor = '#c3e6cb';
+                        statusDiv.innerHTML = '<span class="material-symbols-outlined" style="vertical-align: middle; color: #155724;">check_circle</span> <span style="color: #155724;">检测到本地设备，正在跳转...</span>';
+                        statusDiv.style.background = 'rgba(212,237,218,0.6)';
+                        statusDiv.style.borderColor = 'rgba(195,230,203,0.6)';
                         setTimeout(() => {
                             window.location.href = 'dashboard.html';
                         }, 1000);
                     } else {
-                        statusDiv.innerHTML = '⚠️ 本地服务已启动，但未检测到设备。请连接设备...';
-                        statusDiv.style.background = '#fff3cd';
-                        statusDiv.style.color = '#856404';
-                        statusDiv.style.borderColor = '#ffeeba';
+                        statusDiv.innerHTML = '<span class="material-symbols-outlined" style="vertical-align: middle; color: #856404;">warning</span> <span style="color: #856404;">本地服务已启动，但未检测到设备。请连接设备...</span>';
+                        statusDiv.style.background = 'rgba(255,243,205,0.6)';
+                        statusDiv.style.borderColor = 'rgba(255,238,186,0.6)';
                     }
                 }
             } catch (e) {
-                statusDiv.innerHTML = '❌ 未检测到本地服务。请启动服务并连接设备后刷新页面。';
-                statusDiv.style.background = '#f8d7da';
-                statusDiv.style.color = '#721c24';
-                statusDiv.style.borderColor = '#f5c6cb';
+                statusDiv.innerHTML = '<span class="material-symbols-outlined" style="vertical-align: middle; color: #721c24;">error</span> <span style="color: #721c24;">未检测到本地服务。请启动服务并连接设备后刷新页面。</span>';
+                statusDiv.style.background = 'rgba(248,215,218,0.6)';
+                statusDiv.style.borderColor = 'rgba(245,198,203,0.6)';
             }
         }
 

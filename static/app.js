@@ -419,9 +419,51 @@ async function runTestStep2() {
     }
 }
 
+// Drag & Drop Logic
+const dropZone = document.getElementById('dropZone');
+const apkInput = document.getElementById('apkFile');
+const uploadText = document.getElementById('uploadText');
+
+if (dropZone) {
+    dropZone.addEventListener('click', () => apkInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+
+        if (e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.name.endsWith('.apk')) {
+                apkInput.files = e.dataTransfer.files;
+                handleFileSelect(apkInput);
+            } else {
+                showToast("请上传 .apk 文件");
+            }
+        }
+    });
+}
+
+function handleFileSelect(input) {
+    if (input.files.length > 0) {
+        uploadText.innerText = `已选择: ${input.files[0].name}`;
+        uploadText.style.color = 'var(--primary-color)';
+        uploadText.style.fontWeight = 'bold';
+    } else {
+        uploadText.innerText = "点击或拖拽 APK 文件到此处";
+        uploadText.style.color = 'var(--text-muted)';
+        uploadText.style.fontWeight = 'normal';
+    }
+}
+
 // Initial Load
-// We don't have checkLocalService anymore because we assume we are on Dashboard
-// But we should try to refresh devices immediately.
 refreshDevices();
-// Refresh every 5 seconds
 setInterval(refreshDevices, 5000);
