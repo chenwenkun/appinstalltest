@@ -2,6 +2,7 @@ import time
 import adbutils
 from loguru import logger
 import os
+from fastapi.concurrency import run_in_threadpool
 
 class TestRunner:
     def __init__(self, device_manager):
