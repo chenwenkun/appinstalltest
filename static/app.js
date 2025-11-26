@@ -431,7 +431,8 @@ const apkInput = document.getElementById('apkFile');
 const uploadText = document.getElementById('uploadText');
 
 if (dropZone) {
-    dropZone.addEventListener('click', () => apkInput.click());
+    // Input covers the zone, so no need for explicit click listener
+    // dropZone.addEventListener('click', () => apkInput.click());
 
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
