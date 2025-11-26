@@ -186,7 +186,7 @@ async function refreshDevices() {
 
 function checkAndSelectDevice(serial, screenOn, unlocked) {
     if (!screenOn || !unlocked) {
-        showToast("设备屏幕锁定或关闭，无法选择！请先解锁设备。", "warning"); // Assuming showToast supports type or just text
+        showToast("设备屏幕锁定或关闭，无法选择！请先解锁设备。", 3000);
         return;
     }
     selectDevice(serial);
