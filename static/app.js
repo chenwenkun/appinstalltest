@@ -100,6 +100,12 @@ async function refreshDevices() {
 
     try {
         const res = await fetch(`${LOCAL_API}/devices`);
+        if (res.ok) {
+            updateClientInfo(true);
+        } else {
+            updateClientInfo(false);
+        }
+
         const devices = await res.json();
 
         deviceTableBody.innerHTML = ''; // Clear now

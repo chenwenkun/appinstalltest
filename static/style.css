@@ -274,47 +274,49 @@ tr:last-child td {
 /* Grid Layout for Dashboard */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1000px 1fr;
-    /* Ultra-wide sidebar as requested */
-    gap: 20px;
-    height: calc(100vh - 100px);
+    grid-template-columns: 450px 1fr;
+    /* Revert to reasonable width */
+    gap: 15px;
+    height: calc(100vh - 80px);
     /* Adjust for header */
 }
 
 .sidebar {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
+    /* Tighter gap */
     overflow-y: auto;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 .main-content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
     overflow: hidden;
     /* Prevent main scroll, let children scroll */
-    padding-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 /* Logs Panel Override */
 .logs-panel {
-    flex: 1;
-    /* Fill remaining space */
-    min-height: 200px;
+    height: 100%;
+    /* Fill entire right column */
     display: flex;
     flex-direction: column;
 }
 
 .logs-panel textarea {
     flex: 1;
+    font-size: 12px;
+    /* Smaller font for logs */
 }
 
 /* APK List Panel Override */
 .apk-panel {
-    height: 300px;
-    /* Fixed height for ~3-4 items */
+    height: 250px;
+    /* Fixed height for sidebar */
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -323,6 +325,32 @@ tr:last-child td {
 .apk-panel .table-container {
     flex: 1;
     overflow-y: auto;
+}
+
+/* Compact Typography */
+body {
+    font-size: 13px;
+    /* Global smaller font */
+}
+
+h1 {
+    font-size: 1.5rem;
+}
+
+h2 {
+    font-size: 1.2rem;
+}
+
+h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.glass-card {
+    padding: 15px;
+    /* Reduced padding */
+    margin-bottom: 0;
+    /* Handled by gap */
 }
 
 /* Spinner */
