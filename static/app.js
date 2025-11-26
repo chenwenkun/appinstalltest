@@ -47,7 +47,7 @@ function updateClientInfo(connected) {
     const infoDiv = document.getElementById('clientInfo');
     if (connected) {
         infoDiv.innerHTML = `
-            <span style="margin-right: 15px;">版本: 0.11.1</span>
+            <span style="margin-right: 15px;">作者：陈文坤</span>
             <span style="margin-right: 15px;">IP: 127.0.0.1</span>
             <span style="color: #52c41a;">● 服务已连接</span>
         `;
@@ -140,11 +140,37 @@ async function refreshDevices() {
                     <td>${d.model || '-'}</td>
                     <td>${statusHtml}</td>
                     <td>
-                        <button class="btn btn-primary" onclick="selectDevice('${d.serial}')">选择</button>
+                        <button class="btn btn-primary" onclick="checkAndSelectDevice('${d.serial}', ${d.screen_on}, ${d.unlocked})">选择</button>
                     </td>
                 `;
                 deviceTableBody.appendChild(tr);
             });
+
+            // Auto-select first device if none selected or current one lost
+            // Only auto-select if it's ready? User didn't specify, but let's keep it simple for now.
+            // If user wants to block manual selection, auto-selection might also need check, 
+            // but usually auto-select is for convenience. Let's leave auto-select as is for now 
+            // or check status. Given "Not give choice", maybe auto-select should also skip bad devices.
+            if (!selectedDevice || !deviceStillConnected) {
+                const readyDevice = devices.find(d => d.screen_on && d.unlocked);
+                if (readyDevice) {
+                    selectDevice(readyDevice.serial);
+                } else if (devices.length > 0) {
+                    // If no ready device, maybe don't select any? Or select first but it will be unusable?
+                    // Let's just select first to show it exists, but user can't "click" to select others.
+                    // Actually, if we select a locked device, the user sees it.
+                    // Let's stick to: Manual click is blocked. Auto-select tries to find a good one.
+                    if (devices[0].screen_on && devices[0].unlocked) {
+                        selectDevice(devices[0].serial);
+                    }
+                }
+            } else {
+                // Ensure UI is synced even if already selected
+                const logDeviceSpan = document.getElementById('logCurrentDevice');
+                if (logDeviceSpan && selectedDevice) {
+                    logDeviceSpan.textContent = `当前: ${selectedDevice}`;
+                }
+            }
         }
 
         // Refresh APKs from Server
@@ -156,6 +182,14 @@ async function refreshDevices() {
         console.log("Local service unreachable, redirecting to index...");
         window.location.href = 'index.html';
     }
+}
+
+function checkAndSelectDevice(serial, screenOn, unlocked) {
+    if (!screenOn || !unlocked) {
+        showToast("设备屏幕锁定或关闭，无法选择！请先解锁设备。", "warning"); // Assuming showToast supports type or just text
+        return;
+    }
+    selectDevice(serial);
 }
 
 async function refreshApks() {

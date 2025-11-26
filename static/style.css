@@ -111,6 +111,19 @@ p {
     color: white;
 }
 
+.btn-success {
+    background: var(--success-color);
+    color: white;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.btn-success:hover:not(:disabled) {
+    background: #27ae60;
+    /* Darker green */
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
+
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;

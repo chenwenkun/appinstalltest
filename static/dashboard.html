@@ -54,7 +54,7 @@
                 <!-- Test Control -->
                 <div class="glass-card" id="testControlCard"
                     style="opacity: 0.5; pointer-events: none; transition: opacity 0.3s; display: flex; flex-direction: column;">
-                    <div class="flex items-center gap-2 mb-2">
+                    <div class="flex items-center gap-2 mb-4">
                         <span class="material-symbols-outlined">play_circle</span>
                         <h3 style="margin: 0;">测试控制</h3>
                     </div>
@@ -85,12 +85,13 @@
                         </div>
                     </div>
 
-                    <div class="flex gap-2 mt-auto pt-2">
-                        <button id="btnStep1" class="btn btn-primary flex-1" onclick="runTestStep1()">
+                    <div class="flex flex-col gap-3 mt-auto pt-4">
+                        <button id="btnStep1" class="btn btn-success w-full" onclick="runTestStep1()"
+                            style="padding: 8px;">
                             <span class="material-symbols-outlined">looks_one</span> 安装旧版
                         </button>
-                        <button id="btnStep2" class="btn btn-primary flex-1" onclick="runTestStep2()" disabled
-                            style="opacity: 0.5; cursor: not-allowed;">
+                        <button id="btnStep2" class="btn btn-success w-full" onclick="runTestStep2()" disabled
+                            style="opacity: 0.5; cursor: not-allowed; padding: 8px;">
                             <span class="material-symbols-outlined">looks_two</span> 覆盖新版
                         </button>
                     </div>
