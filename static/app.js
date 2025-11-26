@@ -219,7 +219,8 @@ async function refreshApks() {
 
 async function uploadApk() {
     const fileInput = document.getElementById('apkFile');
-    const customNameInput = document.getElementById('customName');
+    const remarkInput = document.getElementById('uploadRemark');
+    const filenameInput = document.getElementById('uploadFilename');
     const statusDiv = document.getElementById('uploadStatus');
 
     if (fileInput.files.length === 0) {
@@ -229,8 +230,12 @@ async function uploadApk() {
 
     const formData = new FormData();
     formData.append('file', fileInput.files[0]);
-    if (customNameInput.value) {
-        formData.append('custom_name', customNameInput.value);
+
+    if (remarkInput && remarkInput.value) {
+        formData.append('remark', remarkInput.value);
+    }
+    if (filenameInput && filenameInput.value) {
+        formData.append('custom_filename', filenameInput.value);
     }
 
     statusDiv.innerText = "上传中...";
@@ -246,7 +251,8 @@ async function uploadApk() {
             statusDiv.innerText = "上传成功";
             statusDiv.style.color = "green";
             fileInput.value = ''; // Clear input
-            customNameInput.value = '';
+            if (remarkInput) remarkInput.value = '';
+            if (filenameInput) filenameInput.value = '';
             refreshApks();
             showToast("APK 上传成功");
         } else {

@@ -131,14 +131,15 @@
                         <p id="uploadText" style="margin: 0; font-size: 0.9rem;">点击或拖拽上传</p>
                     </div>
 
-                    <div class="flex gap-2 mt-2">
-                        <input type="text" id="customName" placeholder="此处输入修改上传包名（选填）" style="flex: 1;">
-                        <button class="btn btn-primary" onclick="uploadApk()" style="padding: 5px 15px;">
-                            <span class="material-symbols-outlined">upload</span>
+                    <div class="flex flex-col gap-3 mt-3 w-full">
+                        <input type="text" id="uploadRemark" placeholder="备注 (可选)" style="width: 100%;">
+                        <input type="text" id="uploadFilename" placeholder="此处输入修改上传包名（选填）" style="width: 100%;">
+                        <button class="btn btn-primary w-full" onclick="uploadApk()" style="padding: 8px;">
+                            <span class="material-symbols-outlined">upload</span> 开始上传
                         </button>
                     </div>
                     <div id="uploadStatus"
-                        style="font-size: 0.8rem; text-align: center; height: 1.2em; margin-top: 2px;"></div>
+                        style="font-size: 0.8rem; text-align: center; height: 1.2em; margin-top: 5px;"></div>
                 </div>
             </div>
         </div>

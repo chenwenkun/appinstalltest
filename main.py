@@ -49,8 +49,12 @@ def get_apks():
     return apk_manager.list_apks()
 
 @app.post("/upload")
-async def upload_apk(file: UploadFile = File(...), custom_name: str = Form(None)):
-    return await apk_manager.save_apk(file, custom_name)
+async def upload_apk(
+    file: UploadFile = File(...), 
+    custom_filename: str = Form(None), 
+    remark: str = Form(None)
+):
+    return await apk_manager.save_apk(file, custom_filename, remark)
 
 @app.delete("/apks/{filename}")
 def delete_apk(filename: str):

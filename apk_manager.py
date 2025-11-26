@@ -55,14 +55,14 @@ class ApkManager:
         result.sort(key=lambda x: x["upload_time"], reverse=True)
         return result
 
-    async def save_apk(self, file: UploadFile, custom_name: str = None):
+    async def save_apk(self, file: UploadFile, custom_filename: str = None, remark: str = None):
         """Save an uploaded APK file."""
-        # If custom_name provided, use it for filename (sanitize it)
-        if custom_name:
+        # If custom_filename provided, use it for filename (sanitize it)
+        if custom_filename:
             # Ensure it ends with .apk
-            if not custom_name.endswith(".apk"):
-                custom_name += ".apk"
-            filename = custom_name
+            if not custom_filename.endswith(".apk"):
+                custom_filename += ".apk"
+            filename = custom_filename
         else:
             filename = file.filename
 
@@ -84,7 +84,7 @@ class ApkManager:
                 package_name = "Unknown"
 
             self.metadata[filename] = {
-                "custom_name": custom_name if custom_name else "",
+                "custom_name": remark if remark else "", # Use remark as custom_name (display name)
                 "version_name": str(version_name),
                 "version_code": str(version_code),
                 "package_name": package_name,
