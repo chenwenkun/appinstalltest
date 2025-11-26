@@ -271,60 +271,83 @@ tr:last-child td {
     margin-bottom: 1rem;
 }
 
-/* Grid Layout for Dashboard */
-.dashboard-grid {
+/* New Grid Layout */
+.dashboard-container {
     display: grid;
-    grid-template-columns: 1fr 350px;
-    /* Left fills space, Right (Logs) is fixed 350px */
+    grid-template-columns: 1fr 380px;
+    /* Left Main, Right Logs */
     gap: 15px;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 90px);
     /* Adjust for header */
 }
 
-.sidebar {
+.left-panel {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    /* Tighter gap */
-    overflow-y: auto;
-    padding-bottom: 10px;
+    gap: 15px;
+    height: 100%;
 }
 
-.main-content {
+.top-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    /* Device List wider than Control */
+    gap: 15px;
+    flex: 3;
+    /* 60% height approx */
+    min-height: 0;
+    /* Fix grid overflow */
+}
+
+.bottom-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    /* APK List wider than Upload */
+    gap: 15px;
+    flex: 2;
+    /* 40% height approx */
+    min-height: 0;
+}
+
+.right-panel {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    overflow: hidden;
-    /* Prevent main scroll, let children scroll */
-    padding-bottom: 10px;
 }
 
-/* Logs Panel Override */
+/* Card Overrides */
+.glass-card {
+    height: 100%;
+    /* Fill grid cell */
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    margin-bottom: 0;
+    /* Reset margin */
+}
+
+/* Logs Panel */
 .logs-panel {
     height: 100%;
-    /* Fill entire right column */
-    display: flex;
-    flex-direction: column;
 }
 
 .logs-panel textarea {
     flex: 1;
     font-size: 12px;
-    /* Smaller font for logs */
 }
 
-/* APK List Panel Override */
-.apk-panel {
-    height: 250px;
-    /* Fixed height for sidebar */
-    flex-shrink: 0;
+/* Compact Upload Zone */
+.upload-zone {
+    border: 2px dashed rgba(74, 144, 226, 0.4);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.3);
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
     display: flex;
     flex-direction: column;
-}
-
-.apk-panel .table-container {
-    flex: 1;
-    overflow-y: auto;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Compact Typography */

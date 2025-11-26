@@ -24,132 +24,138 @@
     </div>
 
     <!-- Main Grid -->
-    <div class="dashboard-grid">
-        <!-- Sidebar: Config & Control -->
-        <div class="sidebar">
-            <!-- Device List -->
-            <div class="glass-card">
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="material-symbols-outlined">devices</span>
-                    <h3>设备列表</h3>
+    <div class="dashboard-container">
+        <!-- Left Panel: Operations -->
+        <div class="left-panel">
+            <!-- Top Row: Devices & Control -->
+            <div class="top-row">
+                <!-- Device List -->
+                <div class="glass-card" id="deviceCard" style="display: flex; flex-direction: column;">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined">devices</span>
+                        <h3>设备列表</h3>
+                    </div>
+                    <div style="flex: 1; overflow: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>设备号</th>
+                                    <th>型号</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deviceListBody"></tbody>
+                        </table>
+                    </div>
                 </div>
-                <div style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Serial</th>
-                                <th>Model</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deviceListBody">
-                            <!-- Devices injected here -->
-                        </tbody>
-                    </table>
+
+                <!-- Test Control -->
+                <div class="glass-card" id="testControlCard"
+                    style="opacity: 0.5; pointer-events: none; transition: opacity 0.3s; display: flex; flex-direction: column;">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined">play_circle</span>
+                        <h3>测试控制</h3>
+                    </div>
+
+                    <div class="mb-2" style="background: rgba(0,0,0,0.03); padding: 8px; border-radius: 6px;">
+                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted);">当前设备</label>
+                        <div id="currentDeviceSerial"
+                            style="font-weight: 600; font-family: monospace; font-size: 1rem;">未选择设备</div>
+                    </div>
+
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+                        <div>
+                            <label
+                                style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 2px;">旧版本
+                                APK</label>
+                            <select id="oldApkSelect">
+                                <option value="">-- 请选择 --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 2px;">新版本
+                                APK</label>
+                            <select id="newApkSelect">
+                                <option value="">-- 请选择 --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 mt-auto pt-2">
+                        <button id="btnStep1" class="btn btn-primary flex-1" onclick="runTestStep1()">
+                            <span class="material-symbols-outlined">looks_one</span> 安装旧版
+                        </button>
+                        <button id="btnStep2" class="btn btn-primary flex-1" onclick="runTestStep2()" disabled
+                            style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">looks_two</span> 覆盖新版
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- APK List -->
-            <div class="glass-card apk-panel">
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="material-symbols-outlined">folder_open</span>
-                    <h3>已上传 APK</h3>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>文件名/备注</th>
-                                <th>版本信息</th>
-                                <th>上传时间</th>
-                                <th style="text-align: center;">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="apkListBody">
-                            <!-- APKs injected here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- APK Upload -->
-            <div class="glass-card">
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="material-symbols-outlined">cloud_upload</span>
-                    <h3>上传 APK</h3>
+            <!-- Bottom Row: APKs -->
+            <div class="bottom-row">
+                <!-- APK List -->
+                <div class="glass-card" id="apkListCard" style="display: flex; flex-direction: column;">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        <h3>已上传 APK</h3>
+                    </div>
+                    <div style="flex: 1; overflow: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>文件名/备注</th>
+                                    <th>版本信息</th>
+                                    <th>上传时间</th>
+                                    <th style="text-align: center;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apkListBody"></tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="upload-zone" id="dropZone">
-                    <input type="file" id="apkFile" accept=".apk" onchange="handleFileSelect(this)">
-                    <span class="material-symbols-outlined upload-icon">upload_file</span>
-                    <p id="uploadText">点击或拖拽 APK 文件到此处</p>
-                </div>
+                <!-- APK Upload -->
+                <div class="glass-card" id="uploadCard" style="display: flex; flex-direction: column;">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined">cloud_upload</span>
+                        <h3>上传 APK</h3>
+                    </div>
 
-                <div class="mt-4">
-                    <input type="text" id="customName" placeholder="自定义名称 (可选)">
-                </div>
+                    <div class="upload-zone flex-1 flex flex-col justify-center" id="dropZone" style="padding: 10px;">
+                        <input type="file" id="apkFile" accept=".apk" onchange="handleFileSelect(this)">
+                        <span class="material-symbols-outlined upload-icon" style="font-size: 32px;">upload_file</span>
+                        <p id="uploadText" style="margin: 0; font-size: 0.9rem;">点击或拖拽上传</p>
+                    </div>
 
-                <button class="btn btn-primary w-full mt-4" onclick="uploadApk()">
-                    <span class="material-symbols-outlined">upload</span> 开始上传
-                </button>
-                <div id="uploadStatus" class="mt-4" style="font-size: 0.9rem; text-align: center;"></div>
-            </div>
-
-            <!-- Test Control -->
-            <div class="glass-card" id="testControlCard"
-                style="opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="material-symbols-outlined">play_circle</span>
-                    <h3>测试控制</h3>
-                </div>
-
-                <div class="mb-4">
-                    <label
-                        style="display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted);">当前设备</label>
-                    <div id="currentDeviceSerial" style="font-weight: 600; font-family: monospace;">未选择设备</div>
-                </div>
-
-                <div class="mb-4">
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted);">旧版本
-                        APK</label>
-                    <select id="oldApkSelect">
-                        <option value="">-- 请选择 --</option>
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted);">新版本
-                        APK</label>
-                    <select id="newApkSelect">
-                        <option value="">-- 请选择 --</option>
-                    </select>
-                </div>
-
-                <div class="flex flex-col gap-2">
-                    <button id="btnStep1" class="btn btn-primary" onclick="runTestStep1()">
-                        <span class="material-symbols-outlined">looks_one</span> 第一步: 安装旧版本
-                    </button>
-                    <button id="btnStep2" class="btn btn-primary" onclick="runTestStep2()" disabled
-                        style="opacity: 0.5; cursor: not-allowed;">
-                        <span class="material-symbols-outlined">looks_two</span> 第二步: 覆盖安装新版本
-                    </button>
+                    <div class="flex gap-2 mt-2">
+                        <input type="text" id="customName" placeholder="备注 (可选)" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="uploadApk()" style="padding: 5px 15px;">
+                            <span class="material-symbols-outlined">upload</span>
+                        </button>
+                    </div>
+                    <div id="uploadStatus"
+                        style="font-size: 0.8rem; text-align: center; height: 1.2em; margin-top: 2px;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Content: Logs -->
-        <div class="main-content">
-            <!-- Logs -->
+        <!-- Right Panel: Logs -->
+        <div class="right-panel">
             <div class="glass-card logs-panel flex-1 flex flex-col">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined">terminal</span>
                         <h3>运行日志</h3>
+                        <span id="logCurrentDevice"
+                            style="font-size: 0.8rem; color: var(--text-muted); margin-left: 5px; font-family: monospace;"></span>
                     </div>
                     <button class="btn btn-danger-outline" onclick="document.getElementById('logArea').value = ''"
-                        style="padding: 5px 10px; font-size: 0.8rem;">
-                        <span class="material-symbols-outlined" style="font-size: 16px;">delete</span> 清空
+                        style="padding: 2px 8px; font-size: 0.8rem;">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">delete</span> 清空
                     </button>
                 </div>
                 <textarea id="logArea" class="log-container" readonly spellcheck="false"></textarea>
