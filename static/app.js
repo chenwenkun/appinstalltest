@@ -111,10 +111,9 @@ async function refreshDevices() {
         deviceTableBody.innerHTML = ''; // Clear now
 
         if (devices.length === 0) {
-            // deviceTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">暂无设备连接</td></tr>';
-            // Redirect to index if no devices found
-            console.log("No devices found, redirecting to index...");
-            window.location.href = 'index.html';
+            deviceTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">暂无设备连接</td></tr>';
+            // Do not redirect, just show message
+            updateClientInfo(true); // Service is ok, just no devices
             return;
         } else {
             devices.forEach(d => {
@@ -178,9 +177,8 @@ async function refreshDevices() {
 
     } catch (e) {
         console.error("Failed to fetch devices", e);
-        // Redirect to index if service is unreachable
-        console.log("Local service unreachable, redirecting to index...");
-        window.location.href = 'index.html';
+        updateClientInfo(false);
+        // Do not redirect
     }
 }
 
