@@ -105,8 +105,11 @@ async function refreshDevices() {
         deviceTableBody.innerHTML = ''; // Clear now
 
         if (devices.length === 0) {
-            deviceTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">暂无设备连接</td></tr>';
-            // Do not return here, so we can still refresh APKs
+            // deviceTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">暂无设备连接</td></tr>';
+            // Redirect to index if no devices found
+            console.log("No devices found, redirecting to index...");
+            window.location.href = 'index.html';
+            return;
         } else {
             devices.forEach(d => {
                 const tr = document.createElement('tr');
