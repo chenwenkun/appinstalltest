@@ -146,12 +146,9 @@ async function refreshDevices() {
 
     } catch (e) {
         console.error("Failed to fetch devices", e);
-        // Don't clear table on transient error, just log
-        if (deviceTableBody.children.length === 0) {
-            deviceTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">获取设备列表失败 (请确保本地服务已启动)</td></tr>';
-        }
-        // Still try to refresh APKs
-        refreshApks();
+        // Redirect to index if service is unreachable
+        console.log("Local service unreachable, redirecting to index...");
+        window.location.href = 'index.html';
     }
 }
 
