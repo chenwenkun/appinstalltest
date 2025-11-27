@@ -196,15 +196,43 @@ table {
 
 th {
     text-align: left;
-    padding: 8px 16px;
+    padding: 4px 16px;
     color: var(--text-muted);
     font-weight: 600;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 td {
-    padding: 8px 16px;
+    padding: 4px 16px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Icon Buttons */
+.btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.btn-icon:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-color);
+}
+
+.btn-icon.delete {
+    color: var(--danger-color);
+}
+
+.btn-icon.delete:hover {
+    background: rgba(231, 76, 60, 0.1);
+    color: #c0392b;
 }
 
 tr:last-child td {
