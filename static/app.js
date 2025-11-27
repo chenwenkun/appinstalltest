@@ -205,30 +205,12 @@ function switchFileTab(tab) {
     const btnAndroid = document.getElementById('tabAndroid');
     const btnIos = document.getElementById('tabIos');
 
-    // Reset styles
-    const activeStyle = "px-4 py-1.5 rounded-md text-sm font-bold transition-all";
-    const inactiveStyle = "px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
-
     if (tab === 'android') {
-        btnAndroid.className = activeStyle;
-        btnAndroid.style.color = "var(--primary-color)";
-        btnAndroid.style.background = "white";
-        btnAndroid.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
-
-        btnIos.className = inactiveStyle;
-        btnIos.style.color = "";
-        btnIos.style.background = "";
-        btnIos.style.boxShadow = "";
+        btnAndroid.classList.add('active');
+        btnIos.classList.remove('active');
     } else {
-        btnAndroid.className = inactiveStyle;
-        btnAndroid.style.color = "";
-        btnAndroid.style.background = "";
-        btnAndroid.style.boxShadow = "";
-
-        btnIos.className = activeStyle;
-        btnIos.style.color = "var(--primary-color)";
-        btnIos.style.background = "white";
-        btnIos.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+        btnAndroid.classList.remove('active');
+        btnIos.classList.add('active');
     }
 
     renderApkList();
