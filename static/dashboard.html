@@ -126,6 +126,19 @@
                             <tbody id="apkListBody"></tbody>
                         </table>
                     </div>
+                    <!-- Pagination -->
+                    <div id="paginationControls" class="flex justify-between items-center mt-2"
+                        style="padding: 0 5px; display: none;">
+                        <button class="btn" onclick="changePage(-1)" id="btnPrevPage"
+                            style="padding: 4px 12px; font-size: 0.8rem;" disabled>
+                            <span class="material-symbols-outlined" style="font-size: 16px;">chevron_left</span>
+                        </button>
+                        <span id="pageInfo" style="font-size: 0.85rem; color: var(--text-muted);">1 / 1</span>
+                        <button class="btn" onclick="changePage(1)" id="btnNextPage"
+                            style="padding: 4px 12px; font-size: 0.8rem;" disabled>
+                            <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- APK Upload & Pgyer -->

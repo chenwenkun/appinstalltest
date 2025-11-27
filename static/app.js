@@ -197,9 +197,12 @@ function checkAndSelectDevice(serial, screenOn, unlocked, platform = 'android') 
 let currentFileTab = 'android';
 let allFiles = { android: [], ios: [] };
 let selectedPlatform = 'android'; // Default
+let currentPage = 1;
+const itemsPerPage = 3;
 
 function switchFileTab(tab) {
     currentFileTab = tab;
+    currentPage = 1; // Reset to first page
 
     // Update Tab UI
     const btnAndroid = document.getElementById('tabAndroid');
@@ -230,10 +233,20 @@ function renderApkList() {
 
     if (files.length === 0) {
         listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">暂无文件</td></tr>';
+        document.getElementById('paginationControls').style.display = 'none';
         return;
     }
 
-    files.forEach(f => {
+    // Pagination Logic
+    const totalPages = Math.ceil(files.length / itemsPerPage);
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedFiles = files.slice(startIndex, endIndex);
+
+    paginatedFiles.forEach(f => {
         const tr = document.createElement('tr');
         const displayName = f.custom_name || f.filename;
         const versionInfo = `${f.version_name} (${f.version_code})`;
@@ -256,6 +269,22 @@ function renderApkList() {
         `;
         listBody.appendChild(tr);
     });
+
+    // Update Pagination Controls
+    const paginationControls = document.getElementById('paginationControls');
+    if (totalPages > 1) {
+        paginationControls.style.display = 'flex';
+        document.getElementById('pageInfo').innerText = `${currentPage} / ${totalPages}`;
+        document.getElementById('btnPrevPage').disabled = currentPage === 1;
+        document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+    } else {
+        paginationControls.style.display = 'none';
+    }
+}
+
+function changePage(delta) {
+    currentPage += delta;
+    renderApkList();
 }
 
 function updateTestControlOptions() {
