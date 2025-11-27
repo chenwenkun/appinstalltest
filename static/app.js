@@ -674,7 +674,8 @@ function checkAndSelectDevice(serial, screenOn, unlocked) {
         }
 
         // Initial Load
-        refreshDevices();
-        setInterval(refreshDevices, 5000);
-        refreshApks();
-    };
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshDevices();
+            setInterval(refreshDevices, 5000);
+            refreshApks();
+        });
