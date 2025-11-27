@@ -32,11 +32,7 @@ from fastapi.responses import RedirectResponse
 
 from pgyer_manager import PgyerManager
 
-# Initialize managers
-device_manager = DeviceManager()
-apk_manager = ApkManager("apks")
-test_runner = TestRunner(device_manager)
-pgyer_manager = PgyerManager("apks")
+
 
 @app.post("/pgyer/download")
 async def pgyer_download(background_tasks: BackgroundTasks, item: dict = Body(...)):
