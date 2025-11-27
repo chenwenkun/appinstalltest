@@ -226,20 +226,112 @@ function renderApkList() {
 
     listBody.innerHTML = '';
 
-    // Only update selects if on Android tab (since install logic is Android-only for now)
-    // Or maybe we want to support iOS install later? For now, selects are for Android test flow.
+    // Only update selects if on Android tab
     if (currentFileTab === 'android') {
         // Save current selection
+        const oldVal = oldSelect.value;
+        const newVal = newSelect.value;
+
+        oldSelect.innerHTML = '<option value="">-- 请选择 --</option>';
+        newSelect.innerHTML = '<option value="">-- 请选择 --</option>';
+
+        allFiles.android.forEach(apk => {
+            const option = document.createElement('option');
+            option.value = apk.filename;
+            option.textContent = apk.custom_name ? `${apk.custom_name} (${apk.version_name})` : apk.filename;
+            option.dataset.pkg = apk.package_name;
+
+            oldSelect.appendChild(option.cloneNode(true));
+            newSelect.appendChild(option);
+        });
+
+        // Restore selection
+        oldSelect.value = oldVal;
+        newSelect.value = newVal;
+    }
+
+    const files = allFiles[currentFileTab] || [];
+
+    if (files.length === 0) {
+        listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">暂无文件</td></tr>';
+        return;
+    }
+
+    files.forEach(f => {
+        const tr = document.createElement('tr');
+        const displayName = f.custom_name || f.filename;
+        const versionInfo = `${f.version_name} (${f.version_code})`;
+
+        tr.innerHTML = `
+            <td>
+                <div style="font-weight: 500;">${displayName}</div>
+                <div style="font-size: 0.75rem; color: #999;">${f.filename}</div>
+            </td>
+            <td>
+                <div style="font-size: 0.9rem;">${versionInfo}</div>
+                <div style="font-size: 0.75rem; color: #999;">${f.package_name}</div>
+            </td>
+            <td style="font-size: 0.85rem; color: #666;">${f.upload_time}</td>
+            <td style="text-align: center;">
+                <button class="btn-icon delete" onclick="deleteApk('${f.filename}')" title="删除">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+                </button>
+            </td>
+        `;
+        listBody.appendChild(tr);
     });
-
-    // Restore selection
-    if (currentOld) oldSelect.value = currentOld;
-    if (currentNew) newSelect.value = currentNew;
-
-} catch (e) {
-    console.error("Failed to fetch APKs", e);
-    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">获取 APK 列表失败</td></tr>';
 }
+
+async function refreshApks() {
+    try {
+        const res = await fetch(`${LOCAL_API}/apks`);
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                allFiles.android = data;
+                allFiles.ios = [];
+            } else {
+                allFiles = data;
+            }
+            renderApkList();
+        }
+    } catch (e) {
+        console.error("Failed to fetch APKs", e);
+    }
+}
+
+async function downloadPgyer() {
+    const urlInput = document.getElementById('pgyerUrl');
+    const btn = document.getElementById('btnPgyerDownload');
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        showToast("请输入蒲公英链接");
+        return;
+    }
+
+    setButtonLoading(btn, true, "下载中...");
+
+    try {
+        const res = await fetch(`${LOCAL_API}/pgyer/download`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: url })
+        });
+
+        const result = await res.json();
+        if (result.status === 'success') {
+            showToast(`下载成功: ${result.filename}`, 3000);
+            urlInput.value = '';
+            refreshApks();
+        } else {
+            showToast(`下载失败: ${result.message}`, 5000);
+        }
+    } catch (e) {
+        showToast(`请求失败: ${e.message}`, 5000);
+    } finally {
+        setButtonLoading(btn, false);
+    }
 }
 
 async function uploadApk() {
