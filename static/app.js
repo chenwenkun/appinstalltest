@@ -190,71 +190,77 @@ async function refreshDevices() {
     }
 }
 
-function checkAndSelectDevice(serial, screenOn, unlocked) {
+function checkAndSelectDevice(serial, screenOn, unlocked, platform = 'android') {
     if (!screenOn || !unlocked) {
-        let currentFileTab = 'android';
-        let allFiles = { android: [], ios: [] };
-        let selectedPlatform = 'android'; // Default
+        showToast("设备未就绪 (屏幕关闭或锁定)", 3000);
+        return;
+    }
+    selectDevice(serial, platform);
+}
 
-        function switchFileTab(tab) {
-            currentFileTab = tab;
+let currentFileTab = 'android';
+let allFiles = { android: [], ios: [] };
+let selectedPlatform = 'android'; // Default
 
-            // Update Tab UI
-            const btnAndroid = document.getElementById('tabAndroid');
-            const btnIos = document.getElementById('tabIos');
+function switchFileTab(tab) {
+    currentFileTab = tab;
 
-            // Reset styles
-            const activeStyle = "px-4 py-1.5 rounded-md text-sm font-bold transition-all";
-            const inactiveStyle = "px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
+    // Update Tab UI
+    const btnAndroid = document.getElementById('tabAndroid');
+    const btnIos = document.getElementById('tabIos');
 
-            if (tab === 'android') {
-                btnAndroid.className = activeStyle;
-                btnAndroid.style.color = "var(--primary-color)";
-                btnAndroid.style.background = "white";
-                btnAndroid.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+    // Reset styles
+    const activeStyle = "px-4 py-1.5 rounded-md text-sm font-bold transition-all";
+    const inactiveStyle = "px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
 
-                btnIos.className = inactiveStyle;
-                btnIos.style.color = "";
-                btnIos.style.background = "";
-                btnIos.style.boxShadow = "";
-            } else {
-                btnAndroid.className = inactiveStyle;
-                btnAndroid.style.color = "";
-                btnAndroid.style.background = "";
-                btnAndroid.style.boxShadow = "";
+    if (tab === 'android') {
+        btnAndroid.className = activeStyle;
+        btnAndroid.style.color = "var(--primary-color)";
+        btnAndroid.style.background = "white";
+        btnAndroid.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
 
-                btnIos.className = activeStyle;
-                btnIos.style.color = "var(--primary-color)";
-                btnIos.style.background = "white";
-                btnIos.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
-            }
+        btnIos.className = inactiveStyle;
+        btnIos.style.color = "";
+        btnIos.style.background = "";
+        btnIos.style.boxShadow = "";
+    } else {
+        btnAndroid.className = inactiveStyle;
+        btnAndroid.style.color = "";
+        btnAndroid.style.background = "";
+        btnAndroid.style.boxShadow = "";
 
-            renderApkList();
-        }
+        btnIos.className = activeStyle;
+        btnIos.style.color = "var(--primary-color)";
+        btnIos.style.background = "white";
+        btnIos.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+    }
 
-        function renderApkList() {
-            const listBody = document.getElementById('apkListBody');
-            listBody.innerHTML = '';
+    renderApkList();
+}
 
-            // Note: Selects are now updated by updateTestControlOptions when device is selected
-            // or when files are refreshed if a device is already selected.
-            if (selectedDevice) {
-                updateTestControlOptions();
-            }
+function renderApkList() {
+    const listBody = document.getElementById('apkListBody');
+    listBody.innerHTML = '';
 
-            const files = allFiles[currentFileTab] || [];
+    // Note: Selects are now updated by updateTestControlOptions when device is selected
+    // or when files are refreshed if a device is already selected.
+    if (selectedDevice) {
+        updateTestControlOptions();
+    }
 
-            if (files.length === 0) {
-                listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">暂无文件</td></tr>';
-                return;
-            }
+    const files = allFiles[currentFileTab] || [];
 
-            files.forEach(f => {
-                const tr = document.createElement('tr');
-                const displayName = f.custom_name || f.filename;
-                const versionInfo = `${f.version_name} (${f.version_code})`;
+    if (files.length === 0) {
+        listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">暂无文件</td></tr>';
+        return;
+    }
 
-                tr.innerHTML = `
+    files.forEach(f => {
+        const tr = document.createElement('tr');
+        const displayName = f.custom_name || f.filename;
+        const versionInfo = `${f.version_name} (${f.version_code})`;
+
+        tr.innerHTML = `
             <td>
                 <div style="font-weight: 500;">${displayName}</div>
                 <div style="font-size: 0.75rem; color: #999;">${f.filename}</div>
@@ -270,420 +276,420 @@ function checkAndSelectDevice(serial, screenOn, unlocked) {
                 </button>
             </td>
         `;
-                listBody.appendChild(tr);
-            });
+        listBody.appendChild(tr);
+    });
+}
+
+function updateTestControlOptions() {
+    const oldSelect = document.getElementById('oldApkSelect');
+    const newSelect = document.getElementById('newApkSelect');
+    const oldLabel = document.querySelector('label[for="oldApkSelect"]');
+    const newLabel = document.querySelector('label[for="newApkSelect"]');
+
+    // Save current selection
+    const oldVal = oldSelect.value;
+    const newVal = newSelect.value;
+
+    oldSelect.innerHTML = '<option value="">-- 请选择 --</option>';
+    newSelect.innerHTML = '<option value="">-- 请选择 --</option>';
+
+    let files = [];
+    if (selectedPlatform === 'ios') {
+        files = allFiles.ios || [];
+        if (oldLabel) oldLabel.textContent = "旧版本 App (IPA)";
+        if (newLabel) newLabel.textContent = "新版本 App (IPA)";
+    } else {
+        files = allFiles.android || [];
+        if (oldLabel) oldLabel.textContent = "旧版本 APK";
+        if (newLabel) newLabel.textContent = "新版本 APK";
+    }
+
+    files.forEach(f => {
+        const option = document.createElement('option');
+        option.value = f.filename;
+        option.textContent = f.custom_name ? `${f.custom_name} (${f.version_name})` : f.filename;
+        option.dataset.pkg = f.package_name || f.bundle_id;
+
+        oldSelect.appendChild(option.cloneNode(true));
+        newSelect.appendChild(option);
+    });
+
+    // Try to restore selection if valid
+    // (Simple restore, might fail if switching platforms, which is desired)
+    oldSelect.value = oldVal;
+    newSelect.value = newVal;
+}
+
+async function refreshApks() {
+    try {
+        const res = await fetch(`${LOCAL_API}/apks`);
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) { // Old format, assume android
+                allFiles.android = data;
+                allFiles.ios = [];
+            } else { // New format {android: [], ios: []}
+                allFiles = data;
+            }
+            renderApkList();
         }
+    } catch (e) {
+        console.error("Failed to fetch APKs", e);
+    }
+}
 
-        function updateTestControlOptions() {
-            const oldSelect = document.getElementById('oldApkSelect');
-            const newSelect = document.getElementById('newApkSelect');
-            const oldLabel = document.querySelector('label[for="oldApkSelect"]');
-            const newLabel = document.querySelector('label[for="newApkSelect"]');
+async function downloadPgyer() {
+    const urlInput = document.getElementById('pgyerUrl');
+    const btn = document.getElementById('btnPgyerDownload');
+    const progressDiv = document.getElementById('pgyerProgress');
+    const progressBar = document.getElementById('pgyerProgressBar');
+    const progressText = document.getElementById('pgyerProgressText');
 
-            // Save current selection
-            const oldVal = oldSelect.value;
-            const newVal = newSelect.value;
+    const url = urlInput.value.trim();
 
-            oldSelect.innerHTML = '<option value="">-- 请选择 --</option>';
-            newSelect.innerHTML = '<option value="">-- 请选择 --</option>';
+    if (!url) {
+        showToast("请输入蒲公英链接");
+        return;
+    }
 
-            let files = [];
-            if (selectedPlatform === 'ios') {
-                files = allFiles.ios || [];
-                if (oldLabel) oldLabel.textContent = "旧版本 App (IPA)";
-                if (newLabel) newLabel.textContent = "新版本 App (IPA)";
-            } else {
-                files = allFiles.android || [];
-                if (oldLabel) oldLabel.textContent = "旧版本 APK";
-                if (newLabel) newLabel.textContent = "新版本 APK";
-            }
+    setButtonLoading(btn, true, "请求中...");
+    progressDiv.style.display = 'block';
+    progressBar.style.width = '0%';
+    progressText.textContent = '准备下载...';
 
-            files.forEach(f => {
-                const option = document.createElement('option');
-                option.value = f.filename;
-                option.textContent = f.custom_name ? `${f.custom_name} (${f.version_name})` : f.filename;
-                option.dataset.pkg = f.package_name || f.bundle_id;
+    try {
+        const res = await fetch(`${LOCAL_API}/pgyer/download`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: url })
+        });
 
-                oldSelect.appendChild(option.cloneNode(true));
-                newSelect.appendChild(option);
-            });
-
-            // Try to restore selection if valid
-            // (Simple restore, might fail if switching platforms, which is desired)
-            oldSelect.value = oldVal;
-            newSelect.value = newVal;
-        }
-
-        async function refreshApks() {
-            try {
-                const res = await fetch(`${LOCAL_API}/apks`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) { // Old format, assume android
-                        allFiles.android = data;
-                        allFiles.ios = [];
-                    } else { // New format {android: [], ios: []}
-                        allFiles = data;
-                    }
-                    renderApkList();
-                }
-            } catch (e) {
-                console.error("Failed to fetch APKs", e);
-            }
-        }
-
-        async function downloadPgyer() {
-            const urlInput = document.getElementById('pgyerUrl');
-            const btn = document.getElementById('btnPgyerDownload');
-            const progressDiv = document.getElementById('pgyerProgress');
-            const progressBar = document.getElementById('pgyerProgressBar');
-            const progressText = document.getElementById('pgyerProgressText');
-
-            const url = urlInput.value.trim();
-
-            if (!url) {
-                showToast("请输入蒲公英链接");
-                return;
-            }
-
-            setButtonLoading(btn, true, "请求中...");
-            progressDiv.style.display = 'block';
-            progressBar.style.width = '0%';
-            progressText.textContent = '准备下载...';
-
-            try {
-                const res = await fetch(`${LOCAL_API}/pgyer/download`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url })
-                });
-
-                const result = await res.json();
-                if (result.status === 'started') {
-                    pollPgyerProgress(result.task_id);
-                } else {
-                    showToast(`请求失败: ${result.message}`, 5000);
-                    setButtonLoading(btn, false);
-                    progressDiv.style.display = 'none';
-                }
-            } catch (e) {
-                showToast(`请求失败: ${e.message}`, 5000);
-                setButtonLoading(btn, false);
-                progressDiv.style.display = 'none';
-            }
-        }
-
-        async function pollPgyerProgress(taskId) {
-            const btn = document.getElementById('btnPgyerDownload');
-            const progressBar = document.getElementById('pgyerProgressBar');
-            const progressText = document.getElementById('pgyerProgressText');
-            const urlInput = document.getElementById('pgyerUrl');
-
-            try {
-                const res = await fetch(`${LOCAL_API}/pgyer/progress/${taskId}`);
-                const data = await res.json();
-
-                if (data.percent !== undefined) {
-                    progressBar.style.width = `${data.percent}%`;
-                }
-                if (data.message) {
-                    progressText.textContent = data.message;
-                }
-
-                if (data.status === 'success') {
-                    showToast(`下载成功: ${data.filename}`, 3000);
-                    setButtonLoading(btn, false);
-                    urlInput.value = '';
-                    refreshApks();
-                    setTimeout(() => {
-                        document.getElementById('pgyerProgress').style.display = 'none';
-                    }, 3000);
-                } else if (data.status === 'error') {
-                    showToast(`下载失败: ${data.message}`, 5000);
-                    setButtonLoading(btn, false);
-                    document.getElementById('pgyerProgress').style.display = 'none';
-                } else {
-                    // Continue polling
-                    setTimeout(() => pollPgyerProgress(taskId), 1000);
-                }
-            } catch (e) {
-                console.error("Polling error", e);
-                setButtonLoading(btn, false);
-                document.getElementById('pgyerProgress').style.display = 'none';
-            }
-        }
-
-        async function uploadApk() {
-            const fileInput = document.getElementById('apkFile');
-            const remarkInput = document.getElementById('uploadRemark');
-            const filenameInput = document.getElementById('uploadFilename');
-            const statusDiv = document.getElementById('uploadStatus');
-
-            if (fileInput.files.length === 0) {
-                showToast("请选择文件");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-
-            if (remarkInput && remarkInput.value) {
-                formData.append('remark', remarkInput.value);
-            }
-            if (filenameInput && filenameInput.value) {
-                formData.append('custom_filename', filenameInput.value);
-            }
-
-            statusDiv.innerText = "上传中...";
-
-            try {
-                const res = await fetch(`${SERVER_API}/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await res.json();
-
-                if (result.status === 'success') {
-                    statusDiv.innerText = "上传成功";
-                    statusDiv.style.color = "green";
-                    fileInput.value = ''; // Clear input
-                    if (remarkInput) remarkInput.value = '';
-                    if (filenameInput) filenameInput.value = '';
-                    refreshApks();
-                    showToast("APK 上传成功");
-                } else {
-                    statusDiv.innerText = "上传失败: " + result.message;
-                    statusDiv.style.color = "red";
-                    showToast("上传失败: " + result.message);
-                }
-            } catch (e) {
-                statusDiv.innerText = "上传错误: " + e;
-                statusDiv.style.color = "red";
-                showToast("上传错误: " + e);
-            }
-        }
-
-        async function deleteApk(filename) {
-            if (!confirm(`确定要删除 ${filename} 吗？`)) return;
-
-            try {
-                const res = await fetch(`${SERVER_API}/apks/${filename}`, {
-                    method: 'DELETE'
-                });
-                const result = await res.json();
-                if (result.status === 'success') {
-                    showToast("删除成功");
-                    refreshApks();
-                } else {
-                    showToast("删除失败: " + result.message);
-                }
-            } catch (e) {
-                showToast("删除错误: " + e);
-            }
-        }
-
-        function selectDevice(serial) {
-            selectedDevice = serial;
-            document.getElementById('currentDeviceSerial').innerText = serial;
-            refreshDevices(); // Re-render to highlight
-
-            // Enable Test Card
-            const testCard = document.getElementById('testControlCard');
-            testCard.style.opacity = '1';
-            testCard.style.pointerEvents = 'auto';
-
-            // Reset Buttons
-            document.getElementById('btnStep1').disabled = false;
-            const btn2 = document.getElementById('btnStep2');
-            btn2.style.display = 'inline-block'; // Always show
-            btn2.disabled = true; // Initially disabled
-            btn2.style.opacity = '0.5';
-            btn2.style.cursor = 'not-allowed';
-
-            // Highlight row
-            refreshApks();
-        }
-
-        async function runTestStep1() {
-            const deviceSerial = document.getElementById('currentDeviceSerial').innerText;
-            const oldApk = document.getElementById('oldApkSelect').value;
-            const newApk = document.getElementById('newApkSelect').value;
-
-            if (!deviceSerial || deviceSerial === "未选择设备") {
-                showToast("请先选择设备");
-                return;
-            }
-            if (!oldApk || !newApk) {
-                showToast("请选择 APK");
-                return;
-            }
-
-            const logArea = document.getElementById('logArea');
-            logArea.value = `[${new Date().toLocaleTimeString()}] 开始第一步: 安装旧版本...\n`;
-
-            showToast("即将开始第一步：安装旧版本 APK。请确保设备屏幕已解锁。", 2000);
-
-            const btn1 = document.getElementById('btnStep1');
-            const btn2 = document.getElementById('btnStep2');
-
-            // Set Loading
-            setButtonLoading(btn1, true, "正在安装旧版本...");
-
-            // Ensure Step 2 is disabled
-            btn2.disabled = true;
-            btn2.style.opacity = '0.5';
-            btn2.style.cursor = 'not-allowed';
-
-            // Construct Remote URL for APK
-            const apkUrl = `${SERVER_API}/uploads/${oldApk}`;
-
-            try {
-                const res = await fetch(`${LOCAL_API}/install_old`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        device_serial: deviceSerial,
-                        old_apk_name: oldApk, // Still pass name for logging
-                        apk_url: apkUrl // Pass URL for download
-                    })
-                });
-                const result = await res.json();
-
-                if (result.status === 'success') {
-                    logArea.value += `[${new Date().toLocaleTimeString()}] ✅ 旧版本安装成功\n`;
-                    logArea.value += `   包名: ${result.package_name}\n`;
-                    logArea.value += `   版本: ${result.version_name} (${result.version_code})\n`;
-                    logArea.value += `   请检查设备上的应用是否正常启动。\n`;
-
-                    currentPackageName = result.package_name;
-
-                    // Enable Step 2 Button
-                    btn2.disabled = false;
-                    btn2.style.opacity = '1';
-                    btn2.style.cursor = 'pointer';
-                    btn2.innerText = "继续: 覆盖安装新版本";
-
-                    showToast("第一步完成！旧版本已安装。请点击“继续”进行覆盖安装。", 3000);
-
-                } else {
-                    logArea.value += `[${new Date().toLocaleTimeString()}] ❌ 失败: ${result.reason || result.message}\n`;
-                    showToast("安装旧版本失败：" + (result.reason || result.message));
-                }
-            } catch (e) {
-                logArea.value += `[${new Date().toLocaleTimeString()}] ❌ 错误: ${e}\n`;
-                showToast("请求错误：" + e);
-            } finally {
-                // Restore Button 1
-                setButtonLoading(btn1, false);
-            }
-        }
-
-        async function runTestStep2() {
-            if (!currentPackageName) {
-                showToast("未知包名，请先执行第一步");
-                return;
-            }
-            const deviceSerial = document.getElementById('currentDeviceSerial').innerText;
-            const newApk = document.getElementById('newApkSelect').value;
-            const logArea = document.getElementById('logArea');
-
-            logArea.value += `\n[${new Date().toLocaleTimeString()}] 开始第二步: 覆盖安装新版本...\n`;
-
-            const btn2 = document.getElementById('btnStep2');
-            setButtonLoading(btn2, true, "正在覆盖安装...");
-
-            showToast("即将开始第二步：覆盖安装新版本 APK。", 2000);
-
-            // Construct Remote URL for APK
-            const apkUrl = `${SERVER_API}/uploads/${newApk}`;
-
-            try {
-                const res = await fetch(`${LOCAL_API}/install_new`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        device_serial: deviceSerial,
-                        new_apk_name: newApk,
-                        package_name: currentPackageName,
-                        apk_url: apkUrl
-                    })
-                });
-                const result = await res.json();
-
-                if (result.status === 'success') {
-                    logArea.value += `[${new Date().toLocaleTimeString()}] ✅ ${result.message}\n`;
-                    logArea.value += `[${new Date().toLocaleTimeString()}] 🎉 测试完成!\n`;
-
-                    showToast("测试完成！覆盖安装成功，应用正在运行。", 3000);
-                } else {
-                    logArea.value += `[${new Date().toLocaleTimeString()}] ❌ 失败: ${result.reason || result.message}\n`;
-                    showToast("覆盖安装失败：" + (result.reason || result.message));
-                }
-            } catch (e) {
-                logArea.value += `[${new Date().toLocaleTimeString()}] ❌ 错误: ${e}\n`;
-                showToast("请求错误：" + e);
-            } finally {
-                setButtonLoading(btn2, false);
-            }
-        }
-
-        // Drag & Drop Logic
-        const dropZone = document.getElementById('dropZone');
-        const apkInput = document.getElementById('apkFile');
-        const uploadText = document.getElementById('uploadText');
-
-        if (dropZone) {
-            // Input covers the zone, so no need for explicit click listener
-            // dropZone.addEventListener('click', () => apkInput.click());
-
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('dragover');
-            });
-
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('dragover');
-            });
-
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('dragover');
-
-                if (e.dataTransfer.files.length > 0) {
-                    const file = e.dataTransfer.files[0];
-                    if (file.name.endsWith('.apk')) {
-                        apkInput.files = e.dataTransfer.files;
-                        handleFileSelect(apkInput);
-                    } else {
-                        showToast("请上传 .apk 文件");
-                    }
-                }
-            });
-        }
-
-        function handleFileSelect(input) {
-            if (input.files.length > 0) {
-                uploadText.innerText = `已选择: ${input.files[0].name}`;
-                uploadText.style.color = 'var(--primary-color)';
-                uploadText.style.fontWeight = 'bold';
-            } else {
-                uploadText.innerText = "点击或拖拽 APK 文件到此处";
-                uploadText.style.color = 'var(--text-muted)';
-                uploadText.style.fontWeight = 'normal';
-            }
-        }
-
-        // Initial Load
-        function initApp() {
-            console.log("App initializing...");
-            refreshDevices();
-            setInterval(refreshDevices, 5000);
-            refreshApks();
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
+        const result = await res.json();
+        if (result.status === 'started') {
+            pollPgyerProgress(result.task_id);
         } else {
-            initApp();
+            showToast(`请求失败: ${result.message}`, 5000);
+            setButtonLoading(btn, false);
+            progressDiv.style.display = 'none';
         }
+    } catch (e) {
+        showToast(`请求失败: ${e.message}`, 5000);
+        setButtonLoading(btn, false);
+        progressDiv.style.display = 'none';
+    }
+}
+
+async function pollPgyerProgress(taskId) {
+    const btn = document.getElementById('btnPgyerDownload');
+    const progressBar = document.getElementById('pgyerProgressBar');
+    const progressText = document.getElementById('pgyerProgressText');
+    const urlInput = document.getElementById('pgyerUrl');
+
+    try {
+        const res = await fetch(`${LOCAL_API}/pgyer/progress/${taskId}`);
+        const data = await res.json();
+
+        if (data.percent !== undefined) {
+            progressBar.style.width = `${data.percent}%`;
+        }
+        if (data.message) {
+            progressText.textContent = data.message;
+        }
+
+        if (data.status === 'success') {
+            showToast(`下载成功: ${data.filename}`, 3000);
+            setButtonLoading(btn, false);
+            urlInput.value = '';
+            refreshApks();
+            setTimeout(() => {
+                document.getElementById('pgyerProgress').style.display = 'none';
+            }, 3000);
+        } else if (data.status === 'error') {
+            showToast(`下载失败: ${data.message}`, 5000);
+            setButtonLoading(btn, false);
+            document.getElementById('pgyerProgress').style.display = 'none';
+        } else {
+            // Continue polling
+            setTimeout(() => pollPgyerProgress(taskId), 1000);
+        }
+    } catch (e) {
+        console.error("Polling error", e);
+        setButtonLoading(btn, false);
+        document.getElementById('pgyerProgress').style.display = 'none';
+    }
+}
+
+async function uploadApk() {
+    const fileInput = document.getElementById('apkFile');
+    const remarkInput = document.getElementById('uploadRemark');
+    const filenameInput = document.getElementById('uploadFilename');
+    const statusDiv = document.getElementById('uploadStatus');
+
+    if (fileInput.files.length === 0) {
+        showToast("请选择文件");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    if (remarkInput && remarkInput.value) {
+        formData.append('remark', remarkInput.value);
+    }
+    if (filenameInput && filenameInput.value) {
+        formData.append('custom_filename', filenameInput.value);
+    }
+
+    statusDiv.innerText = "上传中...";
+
+    try {
+        const res = await fetch(`${SERVER_API}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            statusDiv.innerText = "上传成功";
+            statusDiv.style.color = "green";
+            fileInput.value = ''; // Clear input
+            if (remarkInput) remarkInput.value = '';
+            if (filenameInput) filenameInput.value = '';
+            refreshApks();
+            showToast("APK 上传成功");
+        } else {
+            statusDiv.innerText = "上传失败: " + result.message;
+            statusDiv.style.color = "red";
+            showToast("上传失败: " + result.message);
+        }
+    } catch (e) {
+        statusDiv.innerText = "上传错误: " + e;
+        statusDiv.style.color = "red";
+        showToast("上传错误: " + e);
+    }
+}
+
+async function deleteApk(filename) {
+    if (!confirm(`确定要删除 ${filename} 吗？`)) return;
+
+    try {
+        const res = await fetch(`${SERVER_API}/apks/${filename}`, {
+            method: 'DELETE'
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+            showToast("删除成功");
+            refreshApks();
+        } else {
+            showToast("删除失败: " + result.message);
+        }
+    } catch (e) {
+        showToast("删除错误: " + e);
+    }
+}
+
+function selectDevice(serial) {
+    selectedDevice = serial;
+    document.getElementById('currentDeviceSerial').innerText = serial;
+    refreshDevices(); // Re-render to highlight
+
+    // Enable Test Card
+    const testCard = document.getElementById('testControlCard');
+    testCard.style.opacity = '1';
+    testCard.style.pointerEvents = 'auto';
+
+    // Reset Buttons
+    document.getElementById('btnStep1').disabled = false;
+    const btn2 = document.getElementById('btnStep2');
+    btn2.style.display = 'inline-block'; // Always show
+    btn2.disabled = true; // Initially disabled
+    btn2.style.opacity = '0.5';
+    btn2.style.cursor = 'not-allowed';
+
+    // Highlight row
+    refreshApks();
+}
+
+async function runTestStep1() {
+    const deviceSerial = document.getElementById('currentDeviceSerial').innerText;
+    const oldApk = document.getElementById('oldApkSelect').value;
+    const newApk = document.getElementById('newApkSelect').value;
+
+    if (!deviceSerial || deviceSerial === "未选择设备") {
+        showToast("请先选择设备");
+        return;
+    }
+    if (!oldApk || !newApk) {
+        showToast("请选择 APK");
+        return;
+    }
+
+    const logArea = document.getElementById('logArea');
+    logArea.value = `[${new Date().toLocaleTimeString()}] 开始第一步: 安装旧版本...\n`;
+
+    showToast("即将开始第一步：安装旧版本 APK。请确保设备屏幕已解锁。", 2000);
+
+    const btn1 = document.getElementById('btnStep1');
+    const btn2 = document.getElementById('btnStep2');
+
+    // Set Loading
+    setButtonLoading(btn1, true, "正在安装旧版本...");
+
+    // Ensure Step 2 is disabled
+    btn2.disabled = true;
+    btn2.style.opacity = '0.5';
+    btn2.style.cursor = 'not-allowed';
+
+    // Construct Remote URL for APK
+    const apkUrl = `${SERVER_API}/uploads/${oldApk}`;
+
+    try {
+        const res = await fetch(`${LOCAL_API}/install_old`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                device_serial: deviceSerial,
+                old_apk_name: oldApk, // Still pass name for logging
+                apk_url: apkUrl // Pass URL for download
+            })
+        });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            logArea.value += `[${new Date().toLocaleTimeString()}] ✅ 旧版本安装成功\n`;
+            logArea.value += `   包名: ${result.package_name}\n`;
+            logArea.value += `   版本: ${result.version_name} (${result.version_code})\n`;
+            logArea.value += `   请检查设备上的应用是否正常启动。\n`;
+
+            currentPackageName = result.package_name;
+
+            // Enable Step 2 Button
+            btn2.disabled = false;
+            btn2.style.opacity = '1';
+            btn2.style.cursor = 'pointer';
+            btn2.innerText = "继续: 覆盖安装新版本";
+
+            showToast("第一步完成！旧版本已安装。请点击“继续”进行覆盖安装。", 3000);
+
+        } else {
+            logArea.value += `[${new Date().toLocaleTimeString()}] ❌ 失败: ${result.reason || result.message}\n`;
+            showToast("安装旧版本失败：" + (result.reason || result.message));
+        }
+    } catch (e) {
+        logArea.value += `[${new Date().toLocaleTimeString()}] ❌ 错误: ${e}\n`;
+        showToast("请求错误：" + e);
+    } finally {
+        // Restore Button 1
+        setButtonLoading(btn1, false);
+    }
+}
+
+async function runTestStep2() {
+    if (!currentPackageName) {
+        showToast("未知包名，请先执行第一步");
+        return;
+    }
+    const deviceSerial = document.getElementById('currentDeviceSerial').innerText;
+    const newApk = document.getElementById('newApkSelect').value;
+    const logArea = document.getElementById('logArea');
+
+    logArea.value += `\n[${new Date().toLocaleTimeString()}] 开始第二步: 覆盖安装新版本...\n`;
+
+    const btn2 = document.getElementById('btnStep2');
+    setButtonLoading(btn2, true, "正在覆盖安装...");
+
+    showToast("即将开始第二步：覆盖安装新版本 APK。", 2000);
+
+    // Construct Remote URL for APK
+    const apkUrl = `${SERVER_API}/uploads/${newApk}`;
+
+    try {
+        const res = await fetch(`${LOCAL_API}/install_new`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                device_serial: deviceSerial,
+                new_apk_name: newApk,
+                package_name: currentPackageName,
+                apk_url: apkUrl
+            })
+        });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            logArea.value += `[${new Date().toLocaleTimeString()}] ✅ ${result.message}\n`;
+            logArea.value += `[${new Date().toLocaleTimeString()}] 🎉 测试完成!\n`;
+
+            showToast("测试完成！覆盖安装成功，应用正在运行。", 3000);
+        } else {
+            logArea.value += `[${new Date().toLocaleTimeString()}] ❌ 失败: ${result.reason || result.message}\n`;
+            showToast("覆盖安装失败：" + (result.reason || result.message));
+        }
+    } catch (e) {
+        logArea.value += `[${new Date().toLocaleTimeString()}] ❌ 错误: ${e}\n`;
+        showToast("请求错误：" + e);
+    } finally {
+        setButtonLoading(btn2, false);
+    }
+}
+
+// Drag & Drop Logic
+const dropZone = document.getElementById('dropZone');
+const apkInput = document.getElementById('apkFile');
+const uploadText = document.getElementById('uploadText');
+
+if (dropZone) {
+    // Input covers the zone, so no need for explicit click listener
+    // dropZone.addEventListener('click', () => apkInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+
+        if (e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.name.endsWith('.apk')) {
+                apkInput.files = e.dataTransfer.files;
+                handleFileSelect(apkInput);
+            } else {
+                showToast("请上传 .apk 文件");
+            }
+        }
+    });
+}
+
+function handleFileSelect(input) {
+    if (input.files.length > 0) {
+        uploadText.innerText = `已选择: ${input.files[0].name}`;
+        uploadText.style.color = 'var(--primary-color)';
+        uploadText.style.fontWeight = 'bold';
+    } else {
+        uploadText.innerText = "点击或拖拽 APK 文件到此处";
+        uploadText.style.color = 'var(--text-muted)';
+        uploadText.style.fontWeight = 'normal';
+    }
+}
+
+// Initial Load
+function initApp() {
+    console.log("App initializing...");
+    refreshDevices();
+    setInterval(refreshDevices, 5000);
+    refreshApks();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
     }
