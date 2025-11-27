@@ -674,8 +674,16 @@ function checkAndSelectDevice(serial, screenOn, unlocked) {
         }
 
         // Initial Load
-        document.addEventListener('DOMContentLoaded', () => {
+        function initApp() {
+            console.log("App initializing...");
             refreshDevices();
             setInterval(refreshDevices, 5000);
             refreshApks();
-        });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+        ```
