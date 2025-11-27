@@ -686,4 +686,4 @@ function checkAndSelectDevice(serial, screenOn, unlocked) {
         } else {
             initApp();
         }
-        ```
+    }
