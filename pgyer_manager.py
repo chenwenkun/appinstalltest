@@ -211,6 +211,18 @@ class PgyerManager:
             
             with requests.get(url, stream=True) as r:
                 r.raise_for_status()
+                
+                # Debug Content-Type
+                content_type = r.headers.get('Content-Type', '')
+                logger.info(f"Download Content-Type: {content_type}")
+                
+                if 'text/html' in content_type:
+                    logger.warning("Download URL returned HTML. Likely a login page or error.")
+                    # Read a bit to see what it is
+                    preview = r.content[:500].decode('utf-8', errors='ignore')
+                    logger.warning(f"Preview: {preview}")
+                    raise Exception("Download URL returned HTML instead of a file.")
+
                 total_length = int(r.headers.get('content-length', 0))
                 dl = 0
                 
