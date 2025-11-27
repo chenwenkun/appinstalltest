@@ -1,0 +1,2 @@
+[console_scripts]
+appinstalltest = start_server:main

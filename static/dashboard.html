@@ -102,9 +102,19 @@
             <div class="bottom-row">
                 <!-- APK List -->
                 <div class="glass-card" id="apkListCard" style="display: flex; flex-direction: column;">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined">folder_open</span>
-                        <h3 style="margin: 0;">已上传 APK</h3>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined">folder_open</span>
+                            <h3 style="margin: 0;">已上传文件</h3>
+                        </div>
+                        <div class="flex gap-1 bg-gray-100 p-1 rounded-lg">
+                            <button id="tabAndroid"
+                                class="px-3 py-1 rounded-md text-sm font-medium bg-white shadow-sm text-primary transition-all"
+                                onclick="switchFileTab('android')">Android</button>
+                            <button id="tabIos"
+                                class="px-3 py-1 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all"
+                                onclick="switchFileTab('ios')">iOS</button>
+                        </div>
                     </div>
                     <div style="flex: 1; overflow: auto;">
                         <table>
@@ -121,22 +131,36 @@
                     </div>
                 </div>
 
-                <!-- APK Upload -->
+                <!-- APK Upload & Pgyer -->
                 <div class="glass-card" id="uploadCard" style="display: flex; flex-direction: column;">
                     <div class="flex items-center gap-2 mb-2">
                         <span class="material-symbols-outlined">cloud_upload</span>
-                        <h3 style="margin: 0;">上传 APK</h3>
+                        <h3 style="margin: 0;">上传 / 下载</h3>
                     </div>
 
-                    <div class="upload-zone flex-1 flex flex-col justify-center" id="dropZone" style="padding: 10px;">
-                        <input type="file" id="apkFile" accept=".apk" onchange="handleFileSelect(this)">
+                    <!-- Pgyer Download -->
+                    <div class="mb-4">
+                        <label
+                            style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">蒲公英链接下载</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="pgyerUrl" placeholder="请输入蒲公英链接 (https://www.pgyer.com/...)"
+                                style="flex: 1;">
+                            <button class="btn btn-primary" onclick="downloadPgyer()" id="btnPgyerDownload">
+                                <span class="material-symbols-outlined">download</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="upload-zone flex-1 flex flex-col justify-center" id="dropZone"
+                        style="padding: 10px; min-height: 100px;">
+                        <input type="file" id="apkFile" accept=".apk,.ipa" onchange="handleFileSelect(this)">
                         <span class="material-symbols-outlined upload-icon" style="font-size: 32px;">upload_file</span>
-                        <p id="uploadText" style="margin: 0; font-size: 0.9rem;">点击或拖拽上传</p>
+                        <p id="uploadText" style="margin: 0; font-size: 0.9rem;">点击或拖拽文件 (APK/IPA)</p>
                     </div>
 
                     <div class="flex flex-col gap-4 mt-4 w-full">
                         <input type="text" id="uploadRemark" placeholder="备注 (可选)" style="width: 100%;">
-                        <input type="text" id="uploadFilename" placeholder="此处输入修改上传包名（选填）" style="width: 100%;">
+                        <!-- <input type="text" id="uploadFilename" placeholder="此处输入修改上传包名（选填）" style="width: 100%;"> -->
                         <button class="btn btn-primary w-full" onclick="uploadApk()" style="padding: 8px;">
                             <span class="material-symbols-outlined">upload</span> 开始上传
                         </button>

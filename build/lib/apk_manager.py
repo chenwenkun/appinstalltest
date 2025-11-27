@@ -28,12 +28,9 @@ class ApkManager:
             json.dump(self.metadata, f, indent=4)
 
     def list_apks(self):
-        """List all APK and IPA files with metadata."""
+        """List all APK files with metadata."""
         # Sync with actual files
-        all_files = os.listdir(self.upload_dir)
-        existing_apks = set(f for f in all_files if f.endswith(".apk"))
-        existing_ipas = set(f for f in all_files if f.endswith(".ipa"))
-        existing_files = existing_apks.union(existing_ipas)
+        existing_files = set(f for f in os.listdir(self.upload_dir) if f.endswith(".apk"))
         
         # Remove metadata for missing files
         for filename in list(self.metadata.keys()):
@@ -41,74 +38,50 @@ class ApkManager:
                 del self.metadata[filename]
         self._save_metadata()
 
-        # Build lists
-        android_list = []
-        ios_list = []
-        
+        # Build list
+        result = []
         for filename in existing_files:
             meta = self.metadata.get(filename, {})
-            file_info = {
+            result.append({
                 "filename": filename,
                 "custom_name": meta.get("custom_name", ""),
                 "version_name": meta.get("version_name", "Unknown"),
                 "version_code": meta.get("version_code", "Unknown"),
                 "package_name": meta.get("package_name", "Unknown"),
                 "upload_time": meta.get("upload_time", datetime.fromtimestamp(os.path.getmtime(os.path.join(self.upload_dir, filename))).strftime("%Y-%m-%d %H:%M:%S"))
-            }
-            
-            if filename.endswith(".apk"):
-                android_list.append(file_info)
-            elif filename.endswith(".ipa"):
-                ios_list.append(file_info)
+            })
         
         # Sort by upload time desc
-        android_list.sort(key=lambda x: x["upload_time"], reverse=True)
-        ios_list.sort(key=lambda x: x["upload_time"], reverse=True)
-        
-        return {
-            "android": android_list,
-            "ios": ios_list
-        }
+        result.sort(key=lambda x: x["upload_time"], reverse=True)
+        return result
 
     async def save_apk(self, file: UploadFile, custom_filename: str = None, remark: str = None):
-        """Save an uploaded APK or IPA file."""
-        original_filename = file.filename
-        is_ipa = original_filename.lower().endswith(".ipa")
-        
+        """Save an uploaded APK file."""
         # If custom_filename provided, use it for filename (sanitize it)
         if custom_filename:
+            # Ensure it ends with .apk
+            if not custom_filename.endswith(".apk"):
+                custom_filename += ".apk"
             filename = custom_filename
-            # Ensure extension matches original type if not provided
-            if is_ipa and not filename.lower().endswith(".ipa"):
-                filename += ".ipa"
-            elif not is_ipa and not filename.lower().endswith(".apk"):
-                filename += ".apk"
         else:
-            filename = original_filename
+            filename = file.filename
 
         file_path = os.path.join(self.upload_dir, filename)
         try:
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
             
-            version_name = "Unknown"
-            version_code = "Unknown"
-            package_name = "Unknown"
-
             # Parse APK info
-            if filename.lower().endswith(".apk"):
-                try:
-                    apk = APK(file_path)
-                    version_name = apk.version_name
-                    version_code = apk.version_code
-                    package_name = apk.package
-                except Exception as e:
-                    logger.error(f"Failed to parse APK {filename}: {e}")
-                    version_name = "Parse Error"
-            else:
-                # IPA parsing requires other libs, skipping for now
-                version_name = "IPA File"
-                package_name = "iOS App"
+            try:
+                apk = APK(file_path)
+                version_name = apk.version_name
+                version_code = apk.version_code
+                package_name = apk.package
+            except Exception as e:
+                logger.error(f"Failed to parse APK {filename}: {e}")
+                version_name = "Parse Error"
+                version_code = "Parse Error"
+                package_name = "Unknown"
 
             self.metadata[filename] = {
                 "custom_name": remark if remark else "", # Use remark as custom_name (display name)
@@ -121,7 +94,7 @@ class ApkManager:
 
             return {"filename": filename, "status": "success"}
         except Exception as e:
-            logger.error(f"Error saving file: {e}")
+            logger.error(f"Error saving APK: {e}")
             return {"status": "error", "message": str(e)}
 
     def delete_apk(self, filename):

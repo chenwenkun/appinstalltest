@@ -1,0 +1,5 @@
+apk_manager
+device_manager
+main
+start_server
+test_runner

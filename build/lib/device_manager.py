@@ -1,17 +1,10 @@
 import adbutils
 from loguru import logger
-try:
-    import tidevice
-except ImportError:
-    tidevice = None
-    logger.warning("tidevice not installed, iOS support disabled")
 
 class DeviceManager:
     def list_devices(self):
         """List all connected devices with their status."""
         devices = []
-        
-        # Android Devices
         try:
             for d in adbutils.adb.device_list():
                 model = d.prop.get("ro.product.model", "Unknown")
@@ -25,46 +18,11 @@ class DeviceManager:
                     "product": product,
                     "device": device_name,
                     "screen_on": self.is_screen_on(d),
-                    "unlocked": self.is_unlocked(d),
-                    "platform": "android"
+                    "unlocked": self.is_unlocked(d)
                 }
                 devices.append(info)
         except Exception as e:
-            logger.error(f"Error listing Android devices: {e}")
-
-        # iOS Devices
-        if tidevice:
-            try:
-                t = tidevice.Usbmux()
-                for d in t.device_list():
-                    # d is DeviceInfo(udid='...', name='...', ...)
-                    # We need to get more info if possible, but basic list is fine
-                    # tidevice doesn't give much info in device_list() other than udid and connection type
-                    # We can try to get device name
-                    try:
-                        dev = tidevice.Device(d.udid)
-                        name = dev.name
-                        model = dev.get_value(key="ProductType") # e.g. iPhone10,3
-                        # Check if locked? tidevice doesn't easily give lock state without pairing/lockdown
-                        # We'll assume ready for now or add basic check
-                    except:
-                        name = "iOS Device"
-                        model = "Unknown"
-
-                    info = {
-                        "serial": d.udid,
-                        "state": "device", # Assume device if listed
-                        "model": name, # Use name as model for display
-                        "product": model,
-                        "device": "iPhone",
-                        "screen_on": True, # Hard to detect without more permissions
-                        "unlocked": True, # Hard to detect
-                        "platform": "ios"
-                    }
-                    devices.append(info)
-            except Exception as e:
-                logger.error(f"Error listing iOS devices: {e}")
-
+            logger.error(f"Error listing devices: {e}")
         return devices
 
     def get_device(self, serial):

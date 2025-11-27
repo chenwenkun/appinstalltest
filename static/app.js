@@ -134,8 +134,16 @@ async function refreshDevices() {
                 } else {
                     statusHtml = `<span class="status-badge status-err">${d.state}</span>`;
                 }
+                // Platform Icon
+                let platformIcon = '';
+                if (d.platform === 'ios') {
+                    platformIcon = '<span class="material-symbols-outlined" style="font-size: 18px; color: #555; vertical-align: middle; margin-right: 4px;">phone_iphone</span>';
+                } else {
+                    platformIcon = '<span class="material-symbols-outlined" style="font-size: 18px; color: #3DDC84; vertical-align: middle; margin-right: 4px;">android</span>';
+                }
+
                 tr.innerHTML = `
-                    <td>${d.serial}</td>
+                    <td>${platformIcon}${d.serial}</td>
                     <td>${d.model || '-'}</td>
                     <td>${statusHtml}</td>
                     <td>
@@ -190,63 +198,48 @@ function checkAndSelectDevice(serial, screenOn, unlocked) {
     selectDevice(serial);
 }
 
-async function refreshApks() {
+let currentFileTab = 'android';
+let allFiles = { android: [], ios: [] };
+
+function switchFileTab(tab) {
+    currentFileTab = tab;
+
+    // Update Tab UI
+    const btnAndroid = document.getElementById('tabAndroid');
+    const btnIos = document.getElementById('tabIos');
+
+    if (tab === 'android') {
+        btnAndroid.className = "px-3 py-1 rounded-md text-sm font-medium bg-white shadow-sm text-primary transition-all";
+        btnIos.className = "px-3 py-1 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
+    } else {
+        btnAndroid.className = "px-3 py-1 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
+        btnIos.className = "px-3 py-1 rounded-md text-sm font-medium bg-white shadow-sm text-primary transition-all";
+    }
+
+    renderApkList();
+}
+
+function renderApkList() {
     const listBody = document.getElementById('apkListBody');
     const oldSelect = document.getElementById('oldApkSelect');
     const newSelect = document.getElementById('newApkSelect');
 
-    try {
-        const res = await fetch(`${SERVER_API}/apks`);
-        const apks = await res.json();
+    listBody.innerHTML = '';
 
-        listBody.innerHTML = '';
+    // Only update selects if on Android tab (since install logic is Android-only for now)
+    // Or maybe we want to support iOS install later? For now, selects are for Android test flow.
+    if (currentFileTab === 'android') {
         // Save current selection
-        const currentOld = oldSelect.value;
-        const currentNew = newSelect.value;
+    });
 
-        oldSelect.innerHTML = '<option value="">-- 请选择 --</option>';
-        newSelect.innerHTML = '<option value="">-- 请选择 --</option>';
+    // Restore selection
+    if (currentOld) oldSelect.value = currentOld;
+    if (currentNew) newSelect.value = currentNew;
 
-        if (apks.length === 0) {
-            listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">暂无 APK</td></tr>';
-        }
-
-        apks.forEach(apk => {
-            const displayName = apk.custom_name ? `${apk.custom_name} (${apk.filename})` : apk.filename;
-
-            // Add to table
-            const tr = document.createElement('tr');
-            tr.style.borderBottom = "1px solid #f0f0f0";
-            tr.innerHTML = `
-                <td style="padding: 8px;">${displayName}</td>
-                <td style="padding: 8px;">${apk.version_name} <span style="color: #999; font-size: 12px;">(${apk.version_code})</span></td>
-                <td style="padding: 8px; color: #666;">${apk.upload_time}</td>
-                <td style="padding: 8px; text-align: center;">
-                    <button class="btn btn-danger-outline" style="padding: 2px 8px; font-size: 12px;" onclick="deleteApk('${apk.filename}')">删除</button>
-                </td>
-            `;
-            listBody.appendChild(tr);
-
-            // Add to selects
-            const option1 = document.createElement('option');
-            option1.value = apk.filename;
-            option1.text = displayName;
-            oldSelect.appendChild(option1);
-
-            const option2 = document.createElement('option');
-            option2.value = apk.filename;
-            option2.text = displayName;
-            newSelect.appendChild(option2);
-        });
-
-        // Restore selection
-        if (currentOld) oldSelect.value = currentOld;
-        if (currentNew) newSelect.value = currentNew;
-
-    } catch (e) {
-        console.error("Failed to fetch APKs", e);
-        listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">获取 APK 列表失败</td></tr>';
-    }
+} catch (e) {
+    console.error("Failed to fetch APKs", e);
+    listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">获取 APK 列表失败</td></tr>';
+}
 }
 
 async function uploadApk() {

@@ -29,13 +29,10 @@ app.mount("/uploads", StaticFiles(directory="apks"), name="uploads")
 
 from fastapi.responses import RedirectResponse
 
-from pgyer_manager import PgyerManager
-
 # Initialize managers
 device_manager = DeviceManager()
 apk_manager = ApkManager("apks")
 test_runner = TestRunner(device_manager)
-pgyer_manager = PgyerManager("apks")
 
 @app.get("/")
 async def root():
@@ -58,29 +55,6 @@ async def upload_apk(
     remark: str = Form(None)
 ):
     return await apk_manager.save_apk(file, custom_filename, remark)
-
-@app.post("/pgyer/download")
-async def pgyer_download(item: dict = Body(...)):
-    url = item.get("url")
-    if not url:
-        return {"status": "error", "message": "Missing URL"}
-    
-    # Download
-    result = pgyer_manager.download_app(url)
-    
-    if result.get("status") == "success":
-        # Update metadata for the new file
-        filename = result.get("filename")
-        # We need to register it in apk_manager metadata
-        # Since pgyer_manager saves file to disk, we can just trigger a metadata refresh or manually add it
-        # apk_manager.list_apks() refreshes metadata from disk, so calling it or just letting next refresh handle it works.
-        # But to have immediate metadata (like remark), we might want to update it.
-        # For now, list_apks() will pick it up as a new file without custom metadata.
-        # We can try to add metadata if we want, but apk_manager doesn't expose a "scan_file" method easily.
-        # Let's just let list_apks sync it.
-        pass
-        
-    return result
 
 @app.delete("/apks/{filename}")
 def delete_apk(filename: str):

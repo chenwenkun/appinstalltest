@@ -5,4 +5,3 @@ loguru
 python-multipart
 pyaxmlparser
 requests
-tidevice
