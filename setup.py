@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="appinstalltest",
-    version="0.1.2",
+    version="0.1.3",
     description="APK Compatibility Testing Platform",
     author="Chen Wenkun",
     packages=find_packages(),
