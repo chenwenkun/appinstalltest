@@ -5,19 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>APP兼容性测试平台</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 15px 20px;
+            overflow-y: auto;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             width: 100%;
+            margin: 0 auto;
+            flex: 1;
         }
 
         .step-card {
@@ -27,76 +38,285 @@
             margin-top: 15px;
         }
 
+        .code-block {
+            position: relative;
+            margin-top: 10px;
+        }
+
         code {
             display: block;
             background: rgba(0, 0, 0, 0.05);
-            padding: 10px;
+            padding: 12px 45px 12px 12px;
             border-radius: 6px;
-            margin-top: 5px;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: #555;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .copy-btn.copied {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .copy-btn .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .header-section {
+            margin-bottom: 10px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .step-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .step-card p {
+            margin: 0;
+            line-height: 1.5;
+            font-size: 0.95em;
+        }
+
+        .status-card {
+            margin-bottom: 15px;
+            text-align: center;
+            background: rgba(255, 243, 205, 0.6);
+            border-color: rgba(255, 238, 186, 0.6);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 238, 186, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step-card {
+                padding: 15px;
+            }
+
+            code {
+                font-size: 12px;
+                padding: 10px 40px 10px 10px;
+            }
+        }
+
+        h1 {
+            font-size: 2em;
+            margin: 0;
+            color: #333;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin: 8px 0 8px 0;
+            color: #444;
+        }
+
+        .icon-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .icon-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="container glass-card">
-        <div class="flex items-center gap-2 mb-4">
-            <div class="flex items-center">
-                <span class="material-symbols-outlined"
-                    style="font-size: 48px; color: var(--primary-color);">android</span>
-                <span class="material-symbols-outlined"
-                    style="font-size: 48px; color: #555; margin-left: -10px;">phone_iphone</span>
-            </div>
-            <div>
-                <h1 style="margin:0;">App 覆盖升级兼容性测试平台</h1>
-                <p style="margin:0;">快速、自动化的 App (Android/iOS) 兼容性测试工具</p>
-            </div>
-        </div>
-
-        <div class="flex gap-4" style="margin-bottom: 30px;">
-            <div class="step-card flex-1">
-                <h3><span class="material-symbols-outlined" style="vertical-align: bottom;">devices</span> 设备管理</h3>
-                <p>自动检测设备连接状态、屏幕亮度和锁屏状态。</p>
-            </div>
-            <div class="step-card flex-1">
-                <h3><span class="material-symbols-outlined" style="vertical-align: bottom;">cloud_upload</span> 远程分发
-                </h3>
-                <p>统一管理 APK 文件，支持远程下载和安装。</p>
-            </div>
-            <div class="step-card flex-1">
-                <h3><span class="material-symbols-outlined" style="vertical-align: bottom;">play_arrow</span> 交互测试</h3>
-                <p>一键执行“旧版安装 -> 启动 -> 新版覆盖”流程。</p>
+        <div class="header-section">
+            <div class="icon-header">
+                <div class="icon-group">
+                    <span class="material-symbols-outlined"
+                        style="font-size: 48px; color: var(--primary-color);">android</span>
+                    <span class="material-symbols-outlined"
+                        style="font-size: 48px; color: #555; margin-left: -10px;">phone_iphone</span>
+                </div>
+                <div>
+                    <h1 style="margin-bottom: 4px;">App 覆盖升级兼容性测试平台</h1>
+                    <p style="color: #666; margin: 0;">快速、自动化的 App (Android/iOS) 兼容性测试工具</p>
+                </div>
             </div>
         </div>
 
-        <h2>快速开始</h2>
-
-        <div class="step-card">
-            <h3>1. 获取代码</h3>
-            <code>git clone https://github.com/chenwenkun/appinstalltest.git
-                cd appinstalltest</code>
-        </div>
-        <div class="step-card">
-            <h3>2. 安装依赖</h3>
-            <code>pip install -r requirements.txt</code>
-        </div>
-        <div class="step-card">
-            <h3>3. 启动服务</h3>
-            <code>python main.py</code>
-        </div>
-
-        <div id="status" class="glass-card"
-            style="margin-top: 30px; text-align: center; background: rgba(255,243,205,0.6); border-color: rgba(255,238,186,0.6);">
+        <div id="status" class="status-card">
             <span class="material-symbols-outlined spinner" style="vertical-align: middle; color: #856404;">sync</span>
             <span style="color: #856404; font-weight: 500;">正在检测本地服务...</span>
+        </div>
+
+        <div class="feature-grid">
+            <div class="step-card">
+                <h3>
+                    <span class="material-symbols-outlined">devices</span>
+                    设备管理
+                </h3>
+                <p>自动检测设备连接状态、屏幕亮度和锁屏状态。</p>
+            </div>
+            <div class="step-card">
+                <h3>
+                    <span class="material-symbols-outlined">cloud_upload</span>
+                    远程分发
+                </h3>
+                <p>统一管理 APP 安装包,支持远程下载和覆盖安装。</p>
+            </div>
+            <div class="step-card">
+                <h3>
+                    <span class="material-symbols-outlined">play_arrow</span>
+                    交互测试
+                </h3>
+                <p>执行"旧版安装 -> 启动 -> 新版覆盖"流程。</p>
+            </div>
+        </div>
+
+        <h2>Mac 本地环境配置指南</h2>
+
+        <div class="step-card">
+            <h3>1. 环境准备</h3>
+            <p><strong>Python 环境</strong>: 建议安装 Python 3.8+</p>
+            <div class="code-block">
+                <code>python3 --version</code>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    <span class="btn-text">复制</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <h3>2. Android 环境 (ADB)</h3>
+            <p>推荐使用 Homebrew 安装（若已安装则跳过）:</p>
+            <div class="code-block">
+                <code>brew install android-platform-tools</code>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    <span class="btn-text">复制</span>
+                </button>
+            </div>
+            <p><strong>连接手机</strong>: 开启"开发者模式" -> 开启"USB 调试" -> 授权电脑。</p>
+            <p><strong>验证</strong>:</p>
+            <div class="code-block">
+                <code>adb devices</code>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    <span class="btn-text">复制</span>
+                </button>
+            </div>
+            <p style="margin-top: 8px; color: #666;">应显示 device 状态</p>
+        </div>
+
+        <div class="step-card">
+            <h3>3. 安装与运行</h3>
+            <p>安装最新版工具:</p>
+            <div class="code-block">
+                <code>pip install appinstalltest --upgrade -i https://pypi.doubanio.com/simple</code>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    <span class="btn-text">复制</span>
+                </button>
+            </div>
+            <p>启动服务:</p>
+            <div class="code-block">
+                <code>appinstalltest</code>
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    <span class="btn-text">复制</span>
+                </button>
+            </div>
+            <p style="margin-top: 8px; color: #666;">服务启动后会自动跳转到控制台。</p>
         </div>
     </div>
 
     <script>
+        // 复制代码功能
+        function copyCode(button) {
+            const codeBlock = button.previousElementSibling;
+            const code = codeBlock.textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                // 改变按钮状态
+                button.classList.add('copied');
+                const icon = button.querySelector('.material-symbols-outlined');
+                const text = button.querySelector('.btn-text');
+                icon.textContent = 'check';
+                text.textContent = '已复制';
+
+                // 2秒后恢复
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    icon.textContent = 'content_copy';
+                    text.textContent = '复制';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动复制');
+            });
+        }
+
+        // 检测服务状态
         async function checkService() {
             const statusDiv = document.getElementById('status');
             try {
-                // Try to connect to local service
                 const res = await fetch('http://127.0.0.1:8791/devices');
                 if (res.ok) {
                     const devices = await res.json();
@@ -120,10 +340,10 @@
             }
         }
 
-        // Check on load
+        // 页面加载时检测
         checkService();
 
-        // Check every 2 seconds
+        // 每2秒检测一次
         setInterval(checkService, 2000);
     </script>
 </body>

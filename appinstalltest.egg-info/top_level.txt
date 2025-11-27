@@ -1,5 +1,6 @@
 apk_manager
 device_manager
 main
+pgyer_manager
 start_server
 test_runner

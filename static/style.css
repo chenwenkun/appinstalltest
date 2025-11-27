@@ -24,10 +24,7 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg-gradient);
     color: var(--text-color);
-    height: 100vh;
-    /* Fixed height */
-    overflow: hidden;
-    /* No scroll */
+    min-height: 100vh;
     line-height: 1.6;
     padding: 20px;
     display: flex;
@@ -516,10 +513,16 @@ h3 {
     animation: slideIn 0.3s ease;
 }
 
-to {
-    transform: translateX(0);
-    opacity: 1;
-}
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 /* Segmented Control Tabs */

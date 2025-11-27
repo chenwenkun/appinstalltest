@@ -3,6 +3,7 @@ README.md
 apk_manager.py
 device_manager.py
 main.py
+pgyer_manager.py
 requirements.txt
 setup.py
 start_server.py
