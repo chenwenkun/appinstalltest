@@ -144,28 +144,51 @@ class PgyerManager:
             self.progress[task_id] = {"status": "error", "percent": 0, "message": str(e)}
             return {"status": "error", "message": str(e)}
 
-    def parse_plist(self, itms_url):
+    def parse_plist(self, url):
         try:
-            match = re.search(r"url=([^&]+)", itms_url)
+            from urllib.parse import unquote
+            import plistlib
+            
+            # Extract URL from itms-services link
+            # itms-services://?action=download-manifest&url=https%3A%2F%2Fwww.pgyer.com%2Fapp%2Fplist%2F...
+            match = re.search(r"url=(.+)$", url)
             if not match:
+                logger.error(f"Could not extract plist URL from {url}")
                 return None
             plist_url = unquote(match.group(1))
+            
+            # Fix Pgyer specific URL issue if any
             plist_url = plist_url.replace("install//s.plist", "install/s.plist")
             
+            logger.info(f"Fetching plist from: {plist_url}")
+            
             # Fetch plist
-            # Use itunesstored UA
             headers = {"User-Agent": "itunesstored/1.0"}
             resp = requests.get(plist_url, headers=headers)
             if resp.status_code != 200:
                 logger.error(f"Failed to fetch plist: {resp.status_code}")
                 return None
             
-            ipa_match = re.search(r"<string>(https?://.*?\.ipa)</string>", resp.text)
-            if ipa_match:
-                return ipa_match.group(1)
+            # Parse Plist
+            try:
+                plist_data = plistlib.loads(resp.content)
+                # Navigate: items -> 0 -> assets -> (kind=software-package) -> url
+                items = plist_data.get('items', [])
+                if items:
+                    assets = items[0].get('assets', [])
+                    for asset in assets:
+                        if asset.get('kind') == 'software-package':
+                            return asset.get('url')
+            except Exception as e:
+                logger.error(f"Failed to parse plist content: {e}")
+                # Fallback to regex
+                ipa_match = re.search(r"<string>(https?://.*?\.ipa)</string>", resp.text)
+                if ipa_match:
+                    return ipa_match.group(1)
+                
             return None
         except Exception as e:
-            logger.error(f"Error parsing plist: {e}")
+            logger.error(f"Error processing plist: {e}")
             return None
 
     def download_file(self, url, task_id):
