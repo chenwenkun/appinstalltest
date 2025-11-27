@@ -458,7 +458,7 @@ async function uploadApk() {
             if (remarkInput) remarkInput.value = '';
             if (filenameInput) filenameInput.value = '';
             refreshApks();
-            showToast("APK 上传成功");
+            showToast("文件上传成功");
         } else {
             statusDiv.innerText = "上传失败: " + result.message;
             statusDiv.style.color = "red";
@@ -530,14 +530,14 @@ async function runTestStep1() {
         return;
     }
     if (!oldApk || !newApk) {
-        showToast("请选择 APK");
+        showToast("请选择安装包");
         return;
     }
 
     const logArea = document.getElementById('logArea');
     logArea.value = `[${new Date().toLocaleTimeString()}] 开始第一步: 安装旧版本...\n`;
 
-    showToast("即将开始第一步：安装旧版本 APK。请确保设备屏幕已解锁。", 2000);
+    showToast("即将开始第一步：安装旧版本 App。请确保设备屏幕已解锁。", 2000);
 
     const btn1 = document.getElementById('btnStep1');
     const btn2 = document.getElementById('btnStep2');
@@ -608,7 +608,7 @@ async function runTestStep2() {
     const btn2 = document.getElementById('btnStep2');
     setButtonLoading(btn2, true, "正在覆盖安装...");
 
-    showToast("即将开始第二步：覆盖安装新版本 APK。", 2000);
+    showToast("即将开始第二步：覆盖安装新版本 App。", 2000);
 
     // Construct Remote URL for APK
     const apkUrl = `${SERVER_API}/uploads/${newApk}`;
@@ -683,7 +683,7 @@ function handleFileSelect(input) {
         uploadText.style.color = 'var(--primary-color)';
         uploadText.style.fontWeight = 'bold';
     } else {
-        uploadText.innerText = "点击或拖拽 APK 文件到此处";
+        uploadText.innerText = "点击或拖拽文件 (APK/IPA) 到此处";
         uploadText.style.color = 'var(--text-muted)';
         uploadText.style.fontWeight = 'normal';
     }
