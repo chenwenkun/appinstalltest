@@ -2,6 +2,8 @@ import os
 import shutil
 import json
 import time
+import zipfile
+import plistlib
 from datetime import datetime
 from fastapi import UploadFile
 from loguru import logger
@@ -27,10 +29,48 @@ class ApkManager:
         with open(self.metadata_file, "w") as f:
             json.dump(self.metadata, f, indent=4)
 
+    def _parse_apk(self, file_path):
+        try:
+            apk = APK(file_path)
+            # Handle cases where attributes might be None
+            vn = apk.version_name if apk.version_name else "Unknown"
+            vc = apk.version_code if apk.version_code else "Unknown"
+            pkg = apk.package if apk.package else "Unknown"
+            return vn, vc, pkg
+        except Exception as e:
+            logger.error(f"Failed to parse APK {file_path}: {e}")
+            return "Parse Error", "Parse Error", "Unknown"
+
+    def _parse_ipa(self, file_path):
+        try:
+            with zipfile.ZipFile(file_path, 'r') as z:
+                # Find Info.plist
+                plist_path = None
+                for name in z.namelist():
+                    if name.startswith('Payload/') and name.endswith('.app/Info.plist'):
+                        plist_path = name
+                        break
+                
+                if not plist_path:
+                    return "Unknown", "Unknown", "Unknown"
+
+                with z.open(plist_path) as f:
+                    plist = plistlib.load(f)
+                    version_name = plist.get('CFBundleShortVersionString', 'Unknown')
+                    version_code = plist.get('CFBundleVersion', 'Unknown')
+                    package_name = plist.get('CFBundleIdentifier', 'Unknown')
+                    return version_name, version_code, package_name
+        except Exception as e:
+            logger.error(f"Error parsing IPA {file_path}: {e}")
+            return "Parse Error", "Parse Error", "Unknown"
+
     def list_apks(self):
-        """List all APK files with metadata."""
+        """List all APK and IPA files with metadata."""
         # Sync with actual files
-        existing_files = set(f for f in os.listdir(self.upload_dir) if f.endswith(".apk"))
+        all_files = os.listdir(self.upload_dir)
+        existing_apks = set(f for f in all_files if f.endswith(".apk"))
+        existing_ipas = set(f for f in all_files if f.endswith(".ipa"))
+        existing_files = existing_apks.union(existing_ipas)
         
         # Remove metadata for missing files
         for filename in list(self.metadata.keys()):
@@ -38,50 +78,85 @@ class ApkManager:
                 del self.metadata[filename]
         self._save_metadata()
 
-        # Build list
-        result = []
+        # Build lists
+        android_list = []
+        ios_list = []
+        
         for filename in existing_files:
             meta = self.metadata.get(filename, {})
-            result.append({
+            # Try to parse if unknown (auto-repair metadata)
+            if meta.get("version_name") in ["Unknown", "IPA File", "Parse Error", None]:
+                 if filename.endswith(".ipa"):
+                     vn, vc, pkg = self._parse_ipa(os.path.join(self.upload_dir, filename))
+                     if vn not in ["Unknown", "Parse Error"]:
+                         meta["version_name"] = str(vn)
+                         meta["version_code"] = str(vc)
+                         meta["package_name"] = pkg
+                         self.metadata[filename] = meta
+                         self._save_metadata()
+                 elif filename.endswith(".apk"):
+                     vn, vc, pkg = self._parse_apk(os.path.join(self.upload_dir, filename))
+                     if vn not in ["Unknown", "Parse Error"]:
+                         meta["version_name"] = str(vn)
+                         meta["version_code"] = str(vc)
+                         meta["package_name"] = pkg
+                         self.metadata[filename] = meta
+                         self._save_metadata()
+
+            file_info = {
                 "filename": filename,
                 "custom_name": meta.get("custom_name", ""),
                 "version_name": meta.get("version_name", "Unknown"),
                 "version_code": meta.get("version_code", "Unknown"),
                 "package_name": meta.get("package_name", "Unknown"),
                 "upload_time": meta.get("upload_time", datetime.fromtimestamp(os.path.getmtime(os.path.join(self.upload_dir, filename))).strftime("%Y-%m-%d %H:%M:%S"))
-            })
+            }
+            
+            if filename.endswith(".apk"):
+                android_list.append(file_info)
+            elif filename.endswith(".ipa"):
+                ios_list.append(file_info)
         
         # Sort by upload time desc
-        result.sort(key=lambda x: x["upload_time"], reverse=True)
-        return result
+        android_list.sort(key=lambda x: x["upload_time"], reverse=True)
+        ios_list.sort(key=lambda x: x["upload_time"], reverse=True)
+        
+        return {
+            "android": android_list,
+            "ios": ios_list
+        }
 
     async def save_apk(self, file: UploadFile, custom_filename: str = None, remark: str = None):
-        """Save an uploaded APK file."""
+        """Save an uploaded APK or IPA file."""
+        original_filename = file.filename
+        is_ipa = original_filename.lower().endswith(".ipa")
+        
         # If custom_filename provided, use it for filename (sanitize it)
         if custom_filename:
-            # Ensure it ends with .apk
-            if not custom_filename.endswith(".apk"):
-                custom_filename += ".apk"
             filename = custom_filename
+            # Ensure extension matches original type if not provided
+            if is_ipa and not filename.lower().endswith(".ipa"):
+                filename += ".ipa"
+            elif not is_ipa and not filename.lower().endswith(".apk"):
+                filename += ".apk"
         else:
-            filename = file.filename
+            filename = original_filename
 
         file_path = os.path.join(self.upload_dir, filename)
         try:
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
             
-            # Parse APK info
-            try:
-                apk = APK(file_path)
-                version_name = apk.version_name
-                version_code = apk.version_code
-                package_name = apk.package
-            except Exception as e:
-                logger.error(f"Failed to parse APK {filename}: {e}")
-                version_name = "Parse Error"
-                version_code = "Parse Error"
-                package_name = "Unknown"
+            version_name = "Unknown"
+            version_code = "Unknown"
+            package_name = "Unknown"
+
+            # Parse APK/IPA info
+            # Parse APK/IPA info
+            if filename.lower().endswith(".apk"):
+                version_name, version_code, package_name = self._parse_apk(file_path)
+            elif filename.lower().endswith(".ipa"):
+                version_name, version_code, package_name = self._parse_ipa(file_path)
 
             self.metadata[filename] = {
                 "custom_name": remark if remark else "", # Use remark as custom_name (display name)
@@ -94,7 +169,7 @@ class ApkManager:
 
             return {"filename": filename, "status": "success"}
         except Exception as e:
-            logger.error(f"Error saving APK: {e}")
+            logger.error(f"Error saving file: {e}")
             return {"status": "error", "message": str(e)}
 
     def delete_apk(self, filename):
@@ -116,3 +191,27 @@ class ApkManager:
     def get_apk_path(self, filename):
         """Get the full path of an APK file."""
         return os.path.join(self.upload_dir, filename)
+
+    def register_file(self, filename, remark=None):
+        """Register an existing file (e.g. downloaded) into metadata."""
+        file_path = os.path.join(self.upload_dir, filename)
+        if not os.path.exists(file_path):
+            return {"status": "error", "message": "File not found"}
+            
+        # Parse APK/IPA info
+        if filename.lower().endswith(".apk"):
+            version_name, version_code, package_name = self._parse_apk(file_path)
+        elif filename.lower().endswith(".ipa"):
+            version_name, version_code, package_name = self._parse_ipa(file_path)
+        else:
+            version_name, version_code, package_name = "Unknown", "Unknown", "Unknown"
+
+        self.metadata[filename] = {
+            "custom_name": remark if remark else "",
+            "version_name": str(version_name),
+            "version_code": str(version_code),
+            "package_name": package_name,
+            "upload_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        self._save_metadata()
+        return {"status": "success", "filename": filename}

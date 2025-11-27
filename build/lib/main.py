@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Body, Request
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Body, Request, BackgroundTasks
+import uuid
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -29,10 +30,31 @@ app.mount("/uploads", StaticFiles(directory="apks"), name="uploads")
 
 from fastapi.responses import RedirectResponse
 
+from pgyer_manager import PgyerManager
+
+
+
+@app.post("/pgyer/download")
+async def pgyer_download(background_tasks: BackgroundTasks, item: dict = Body(...)):
+    url = item.get("url")
+    remark = item.get("remark")
+    if not url:
+        return {"status": "error", "message": "Missing URL"}
+    
+    task_id = str(uuid.uuid4())
+    background_tasks.add_task(pgyer_manager.download_app, url, task_id, remark)
+    
+    return {"status": "started", "task_id": task_id}
+
+@app.get("/pgyer/progress/{task_id}")
+def get_pgyer_progress(task_id: str):
+    return pgyer_manager.get_progress(task_id)
+
 # Initialize managers
 device_manager = DeviceManager()
 apk_manager = ApkManager("apks")
-test_runner = TestRunner(device_manager)
+test_runner = TestRunner(device_manager, apk_manager)
+pgyer_manager = PgyerManager("apks", apk_manager)
 
 @app.get("/")
 async def root():
@@ -55,6 +77,22 @@ async def upload_apk(
     remark: str = Form(None)
 ):
     return await apk_manager.save_apk(file, custom_filename, remark)
+
+@app.post("/pgyer/download")
+async def pgyer_download(background_tasks: BackgroundTasks, item: dict = Body(...)):
+    url = item.get("url")
+    remark = item.get("remark")
+    if not url:
+        return {"status": "error", "message": "Missing URL"}
+    
+    task_id = str(uuid.uuid4())
+    background_tasks.add_task(pgyer_manager.download_app, url, task_id, remark)
+    
+    return {"status": "started", "task_id": task_id}
+
+@app.get("/pgyer/progress/{task_id}")
+def get_pgyer_progress(task_id: str):
+    return pgyer_manager.get_progress(task_id)
 
 @app.delete("/apks/{filename}")
 def delete_apk(filename: str):

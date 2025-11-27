@@ -5,11 +5,11 @@ with open("requirements.txt") as f:
 
 setup(
     name="appinstalltest",
-    version="0.1.1",
+    version="0.1.2",
     description="APK Compatibility Testing Platform",
     author="Chen Wenkun",
     packages=find_packages(),
-    py_modules=["main", "apk_manager", "device_manager", "test_runner", "start_server"],
+    py_modules=["main", "apk_manager", "device_manager", "test_runner", "start_server", "pgyer_manager"],
     install_requires=requirements,
     include_package_data=True,
     entry_points={

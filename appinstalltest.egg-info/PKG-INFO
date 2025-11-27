@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: appinstalltest
-Version: 0.1.0
+Version: 0.1.1
 Summary: APK Compatibility Testing Platform
 Author: Chen Wenkun
 Classifier: Programming Language :: Python :: 3
@@ -14,3 +14,4 @@ Requires-Dist: loguru
 Requires-Dist: python-multipart
 Requires-Dist: pyaxmlparser
 Requires-Dist: requests
+Requires-Dist: tidevice
