@@ -134,8 +134,12 @@ class PgyerManager:
             # Download the file
             result = self.download_file(download_url, task_id)
             
-            if result["status"] == "success" and self.apk_manager:
-                self.apk_manager.register_file(result["filename"], remark)
+            if result["status"] == "success":
+                logger.info(f"Download success. Registering file with remark: '{remark}'")
+                if self.apk_manager:
+                    self.apk_manager.register_file(result["filename"], remark)
+                else:
+                    logger.warning("ApkManager not initialized, cannot register file.")
                 
             return result
 
@@ -243,6 +247,14 @@ class PgyerManager:
             return {"status": "success", "message": "Download successful", "filename": local_filename}
         except Exception as e:
             logger.error(f"File download failed: {e}")
+            # Cleanup failed file
+            if os.path.exists(save_path):
+                try:
+                    os.remove(save_path)
+                    logger.info(f"Deleted failed download: {save_path}")
+                except Exception as cleanup_error:
+                    logger.error(f"Failed to delete bad file: {cleanup_error}")
+            
             self.progress[task_id]["status"] = "error"
             self.progress[task_id]["message"] = f"下载失败: {e}"
             return {"status": "error", "message": f"File download failed: {e}"}
