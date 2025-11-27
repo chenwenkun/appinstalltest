@@ -29,6 +29,18 @@ class ApkManager:
         with open(self.metadata_file, "w") as f:
             json.dump(self.metadata, f, indent=4)
 
+    def _parse_apk(self, file_path):
+        try:
+            apk = APK(file_path)
+            # Handle cases where attributes might be None
+            vn = apk.version_name if apk.version_name else "Unknown"
+            vc = apk.version_code if apk.version_code else "Unknown"
+            pkg = apk.package if apk.package else "Unknown"
+            return vn, vc, pkg
+        except Exception as e:
+            logger.error(f"Failed to parse APK {file_path}: {e}")
+            return "Parse Error", "Parse Error", "Unknown"
+
     def _parse_ipa(self, file_path):
         try:
             with zipfile.ZipFile(file_path, 'r') as z:
@@ -73,10 +85,18 @@ class ApkManager:
         for filename in existing_files:
             meta = self.metadata.get(filename, {})
             # Try to parse if unknown (auto-repair metadata)
-            if meta.get("version_name") == "Unknown" or meta.get("version_name") == "IPA File":
+            if meta.get("version_name") in ["Unknown", "IPA File", "Parse Error", None]:
                  if filename.endswith(".ipa"):
                      vn, vc, pkg = self._parse_ipa(os.path.join(self.upload_dir, filename))
-                     if vn != "Unknown" and vn != "Parse Error":
+                     if vn not in ["Unknown", "Parse Error"]:
+                         meta["version_name"] = str(vn)
+                         meta["version_code"] = str(vc)
+                         meta["package_name"] = pkg
+                         self.metadata[filename] = meta
+                         self._save_metadata()
+                 elif filename.endswith(".apk"):
+                     vn, vc, pkg = self._parse_apk(os.path.join(self.upload_dir, filename))
+                     if vn not in ["Unknown", "Parse Error"]:
                          meta["version_name"] = str(vn)
                          meta["version_code"] = str(vc)
                          meta["package_name"] = pkg
@@ -132,15 +152,9 @@ class ApkManager:
             package_name = "Unknown"
 
             # Parse APK/IPA info
+            # Parse APK/IPA info
             if filename.lower().endswith(".apk"):
-                try:
-                    apk = APK(file_path)
-                    version_name = apk.version_name
-                    version_code = apk.version_code
-                    package_name = apk.package
-                except Exception as e:
-                    logger.error(f"Failed to parse APK {filename}: {e}")
-                    version_name = "Parse Error"
+                version_name, version_code, package_name = self._parse_apk(file_path)
             elif filename.lower().endswith(".ipa"):
                 version_name, version_code, package_name = self._parse_ipa(file_path)
 
