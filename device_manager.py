@@ -127,3 +127,29 @@ class DeviceManager:
         except Exception as e:
             logger.error(f"Error checking lock state: {e}")
             return True # Fallback to True
+    def get_platform(self, serial):
+        """Determine platform of the device."""
+        # Check Android
+        try:
+            for d in adbutils.adb.device_list():
+                if d.serial == serial:
+                    return "android"
+        except:
+            pass
+        
+        # Check iOS
+        if tidevice:
+            try:
+                t = tidevice.Usbmux()
+                for d in t.device_list():
+                    if d.udid == serial:
+                        return "ios"
+            except:
+                pass
+        return "unknown"
+
+    def get_ios_device(self, serial):
+        """Get tidevice Device object."""
+        if tidevice:
+            return tidevice.Device(serial)
+        return None

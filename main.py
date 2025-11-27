@@ -56,7 +56,7 @@ def get_pgyer_progress(task_id: str):
 # Initialize managers
 device_manager = DeviceManager()
 apk_manager = ApkManager("apks")
-test_runner = TestRunner(device_manager)
+test_runner = TestRunner(device_manager, apk_manager)
 pgyer_manager = PgyerManager("apks", apk_manager)
 
 @app.get("/")

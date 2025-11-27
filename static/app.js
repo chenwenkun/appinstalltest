@@ -157,14 +157,14 @@ async function refreshDevices() {
             if (!selectedDevice || !deviceStillConnected) {
                 const readyDevice = devices.find(d => d.screen_on && d.unlocked);
                 if (readyDevice) {
-                    selectDevice(readyDevice.serial);
+                    selectDevice(readyDevice.serial, readyDevice.platform);
                 } else if (devices.length > 0) {
                     // If no ready device, maybe don't select any? Or select first but it will be unusable?
                     // Let's just select first to show it exists, but user can't "click" to select others.
                     // Actually, if we select a locked device, the user sees it.
                     // Let's stick to: Manual click is blocked. Auto-select tries to find a good one.
                     if (devices[0].screen_on && devices[0].unlocked) {
-                        selectDevice(devices[0].serial);
+                        selectDevice(devices[0].serial, devices[0].platform);
                     }
                 }
             } else {
