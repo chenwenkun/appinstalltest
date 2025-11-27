@@ -10,6 +10,10 @@ class PgyerManager:
         self.download_dir = download_dir
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
+        self.progress = {}
+
+    def get_progress(self, task_id):
+        return self.progress.get(task_id, {"status": "unknown", "percent": 0})
 
     def decode_data(self, a):
         # JS: for (var b = "", c = "", d = 0; 12 > d; d++) b += String.fromCharCode(parseInt(a.substring(2 * d, 2 * d + 2), 16)).toLowerCase();
@@ -27,11 +31,12 @@ class PgyerManager:
             c += hex(ord(char))[2:].zfill(2)
         return c
 
-    def download_app(self, url):
+    def download_app(self, url, task_id):
         """
         Download app from Pgyer URL.
         Returns: {"status": "success/error", "message": "...", "filename": "..."}
         """
+        self.progress[task_id] = {"status": "analyzing", "percent": 0, "message": "正在解析页面..."}
         try:
             # Determine if it's likely Android or iOS based on URL or try both
             # For simplicity, we'll try a generic approach or default to Android UA first, 
@@ -58,6 +63,7 @@ class PgyerManager:
             # Extract keys
             aKey_match = re.search(r"aKey\s*=\s*'([a-zA-Z0-9]+)'", text)
             if not aKey_match:
+                self.progress[task_id] = {"status": "error", "percent": 0, "message": "无法找到 aKey，页面可能无效或过期"}
                 return {"status": "error", "message": "Could not find aKey. Page might be invalid or expired."}
             aKey = aKey_match.group(1)
 
@@ -86,6 +92,7 @@ class PgyerManager:
                 install_api_url += f"&installToken={install_token}"
 
             logger.info(f"Requesting Install API: {install_api_url}")
+            self.progress[task_id]["message"] = "正在获取下载链接..."
             
             # Request install URL (don't follow redirects yet to check for itms-services)
             install_resp = session.get(install_api_url, allow_redirects=False)
@@ -100,8 +107,10 @@ class PgyerManager:
                 elif "itms-services://" in location:
                     # Handle iOS Plist
                     logger.info("Found itms-services link, parsing plist...")
+                    self.progress[task_id]["message"] = "正在解析 iOS Plist..."
                     download_url = self.parse_plist(location)
                     if not download_url:
+                        self.progress[task_id] = {"status": "error", "percent": 0, "message": "解析 Plist 失败"}
                         return {"status": "error", "message": "Failed to extract IPA URL from plist."}
                 else:
                     # Follow redirect
@@ -118,13 +127,15 @@ class PgyerManager:
                     pass
 
             if not download_url:
+                 self.progress[task_id] = {"status": "error", "percent": 0, "message": "无法找到下载链接"}
                  return {"status": "error", "message": "Could not find download URL."}
 
             # Download the file
-            return self.download_file(download_url)
+            return self.download_file(download_url, task_id)
 
         except Exception as e:
             logger.error(f"Pgyer download failed: {e}")
+            self.progress[task_id] = {"status": "error", "percent": 0, "message": str(e)}
             return {"status": "error", "message": str(e)}
 
     def parse_plist(self, itms_url):
@@ -151,7 +162,7 @@ class PgyerManager:
             logger.error(f"Error parsing plist: {e}")
             return None
 
-    def download_file(self, url):
+    def download_file(self, url, task_id):
         try:
             local_filename = url.split('/')[-1].split('?')[0]
             if not local_filename:
@@ -166,14 +177,31 @@ class PgyerManager:
             save_path = os.path.join(self.download_dir, local_filename)
             
             logger.info(f"Downloading to {save_path}...")
+            self.progress[task_id]["message"] = "开始下载..."
+            self.progress[task_id]["status"] = "downloading"
+            
             with requests.get(url, stream=True) as r:
                 r.raise_for_status()
+                total_length = int(r.headers.get('content-length', 0))
+                dl = 0
+                
                 with open(save_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
+                        dl += len(chunk)
                         f.write(chunk)
+                        if total_length > 0:
+                            percent = int((dl / total_length) * 100)
+                            self.progress[task_id]["percent"] = percent
+                            self.progress[task_id]["message"] = f"下载中 {percent}% ({dl//1024//1024}MB / {total_length//1024//1024}MB)"
             
             logger.info("Download complete.")
+            self.progress[task_id]["status"] = "success"
+            self.progress[task_id]["percent"] = 100
+            self.progress[task_id]["message"] = "下载完成"
+            self.progress[task_id]["filename"] = local_filename
             return {"status": "success", "message": "Download successful", "filename": local_filename}
         except Exception as e:
             logger.error(f"File download failed: {e}")
+            self.progress[task_id]["status"] = "error"
+            self.progress[task_id]["message"] = f"下载失败: {e}"
             return {"status": "error", "message": f"File download failed: {e}"}

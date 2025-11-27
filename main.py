@@ -1,4 +1,22 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Body, Request
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Body, Request, BackgroundTasks
+import uuid
+
+# ... imports ...
+
+@app.post("/pgyer/download")
+async def pgyer_download(background_tasks: BackgroundTasks, item: dict = Body(...)):
+    url = item.get("url")
+    if not url:
+        return {"status": "error", "message": "Missing URL"}
+    
+    task_id = str(uuid.uuid4())
+    background_tasks.add_task(pgyer_manager.download_app, url, task_id)
+    
+    return {"status": "started", "task_id": task_id}
+
+@app.get("/pgyer/progress/{task_id}")
+def get_pgyer_progress(task_id: str):
+    return pgyer_manager.get_progress(task_id)
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -60,27 +78,19 @@ async def upload_apk(
     return await apk_manager.save_apk(file, custom_filename, remark)
 
 @app.post("/pgyer/download")
-async def pgyer_download(item: dict = Body(...)):
+async def pgyer_download(background_tasks: BackgroundTasks, item: dict = Body(...)):
     url = item.get("url")
     if not url:
         return {"status": "error", "message": "Missing URL"}
     
-    # Download
-    result = pgyer_manager.download_app(url)
+    task_id = str(uuid.uuid4())
+    background_tasks.add_task(pgyer_manager.download_app, url, task_id)
     
-    if result.get("status") == "success":
-        # Update metadata for the new file
-        filename = result.get("filename")
-        # We need to register it in apk_manager metadata
-        # Since pgyer_manager saves file to disk, we can just trigger a metadata refresh or manually add it
-        # apk_manager.list_apks() refreshes metadata from disk, so calling it or just letting next refresh handle it works.
-        # But to have immediate metadata (like remark), we might want to update it.
-        # For now, list_apks() will pick it up as a new file without custom metadata.
-        # We can try to add metadata if we want, but apk_manager doesn't expose a "scan_file" method easily.
-        # Let's just let list_apks sync it.
-        pass
-        
-    return result
+    return {"status": "started", "task_id": task_id}
+
+@app.get("/pgyer/progress/{task_id}")
+def get_pgyer_progress(task_id: str):
+    return pgyer_manager.get_progress(task_id)
 
 @app.delete("/apks/{filename}")
 def delete_apk(filename: str):

@@ -2,6 +2,8 @@ import os
 import shutil
 import json
 import time
+import zipfile
+import plistlib
 from datetime import datetime
 from fastapi import UploadFile
 from loguru import logger
@@ -27,6 +29,29 @@ class ApkManager:
         with open(self.metadata_file, "w") as f:
             json.dump(self.metadata, f, indent=4)
 
+    def _parse_ipa(self, file_path):
+        try:
+            with zipfile.ZipFile(file_path, 'r') as z:
+                # Find Info.plist
+                plist_path = None
+                for name in z.namelist():
+                    if name.startswith('Payload/') and name.endswith('.app/Info.plist'):
+                        plist_path = name
+                        break
+                
+                if not plist_path:
+                    return "Unknown", "Unknown", "Unknown"
+
+                with z.open(plist_path) as f:
+                    plist = plistlib.load(f)
+                    version_name = plist.get('CFBundleShortVersionString', 'Unknown')
+                    version_code = plist.get('CFBundleVersion', 'Unknown')
+                    package_name = plist.get('CFBundleIdentifier', 'Unknown')
+                    return version_name, version_code, package_name
+        except Exception as e:
+            logger.error(f"Error parsing IPA {file_path}: {e}")
+            return "Parse Error", "Parse Error", "Unknown"
+
     def list_apks(self):
         """List all APK and IPA files with metadata."""
         # Sync with actual files
@@ -47,6 +72,17 @@ class ApkManager:
         
         for filename in existing_files:
             meta = self.metadata.get(filename, {})
+            # Try to parse if unknown (auto-repair metadata)
+            if meta.get("version_name") == "Unknown" or meta.get("version_name") == "IPA File":
+                 if filename.endswith(".ipa"):
+                     vn, vc, pkg = self._parse_ipa(os.path.join(self.upload_dir, filename))
+                     if vn != "Unknown" and vn != "Parse Error":
+                         meta["version_name"] = str(vn)
+                         meta["version_code"] = str(vc)
+                         meta["package_name"] = pkg
+                         self.metadata[filename] = meta
+                         self._save_metadata()
+
             file_info = {
                 "filename": filename,
                 "custom_name": meta.get("custom_name", ""),
@@ -95,7 +131,7 @@ class ApkManager:
             version_code = "Unknown"
             package_name = "Unknown"
 
-            # Parse APK info
+            # Parse APK/IPA info
             if filename.lower().endswith(".apk"):
                 try:
                     apk = APK(file_path)
@@ -105,10 +141,8 @@ class ApkManager:
                 except Exception as e:
                     logger.error(f"Failed to parse APK {filename}: {e}")
                     version_name = "Parse Error"
-            else:
-                # IPA parsing requires other libs, skipping for now
-                version_name = "IPA File"
-                package_name = "iOS App"
+            elif filename.lower().endswith(".ipa"):
+                version_name, version_code, package_name = self._parse_ipa(file_path)
 
             self.metadata[filename] = {
                 "custom_name": remark if remark else "", # Use remark as custom_name (display name)
