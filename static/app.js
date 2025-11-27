@@ -112,11 +112,13 @@ async function refreshDevices() {
             updateClientInfo(true); // Service is ok, just no devices
             return;
         } else {
+            let deviceStillConnected = false;
             devices.forEach(d => {
                 const tr = document.createElement('tr');
                 tr.className = 'device-row';
                 if (selectedDevice === d.serial) {
                     tr.classList.add('selected');
+                    deviceStillConnected = true;
                 }
 
                 // Status Badge
@@ -149,30 +151,19 @@ async function refreshDevices() {
                 deviceTableBody.appendChild(tr);
             });
 
-            // Auto-select first device if none selected or current one lost
-            // Only auto-select if it's ready? User didn't specify, but let's keep it simple for now.
-            // If user wants to block manual selection, auto-selection might also need check, 
-            // but usually auto-select is for convenience. Let's leave auto-select as is for now 
-            // or check status. Given "Not give choice", maybe auto-select should also skip bad devices.
-            if (!selectedDevice || !deviceStillConnected) {
-                const readyDevice = devices.find(d => d.screen_on && d.unlocked);
-                if (readyDevice) {
-                    selectDevice(readyDevice.serial, readyDevice.platform);
-                } else if (devices.length > 0) {
-                    // If no ready device, maybe don't select any? Or select first but it will be unusable?
-                    // Let's just select first to show it exists, but user can't "click" to select others.
-                    // Actually, if we select a locked device, the user sees it.
-                    // Let's stick to: Manual click is blocked. Auto-select tries to find a good one.
-                    if (devices[0].screen_on && devices[0].unlocked) {
-                        selectDevice(devices[0].serial, devices[0].platform);
-                    }
-                }
-            } else {
-                // Ensure UI is synced even if already selected
+            // Auto-select logic removed as per user request (default to no selection)
+            if (selectedDevice && deviceStillConnected) {
+                // Ensure UI is synced if already selected
                 const logDeviceSpan = document.getElementById('logCurrentDevice');
-                if (logDeviceSpan && selectedDevice) {
+                if (logDeviceSpan) {
                     logDeviceSpan.textContent = `当前: ${selectedDevice}`;
                 }
+            } else if (selectedDevice && !deviceStillConnected) {
+                // Device lost
+                selectedDevice = null;
+                updateTestControlOptions();
+                const logDeviceSpan = document.getElementById('logCurrentDevice');
+                if (logDeviceSpan) logDeviceSpan.textContent = "";
             }
         }
 
