@@ -516,12 +516,14 @@ function selectDevice(serial, platform = 'android') {
     refreshApks();
 }
 
+
+
 async function runTestStep1() {
-    const deviceSerial = document.getElementById('currentDeviceSerial').innerText;
+    const deviceSerial = selectedDevice;
     const oldApk = document.getElementById('oldApkSelect').value;
     const newApk = document.getElementById('newApkSelect').value;
 
-    if (!deviceSerial || deviceSerial === "未选择设备") {
+    if (!deviceSerial) {
         showToast("请先选择设备");
         return;
     }
@@ -595,7 +597,7 @@ async function runTestStep2() {
         showToast("未知包名，请先执行第一步");
         return;
     }
-    const deviceSerial = document.getElementById('currentDeviceSerial').innerText;
+    const deviceSerial = selectedDevice;
     const newApk = document.getElementById('newApkSelect').value;
     const logArea = document.getElementById('logArea');
 
