@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APP兼容性测试平台</title>
+    <title>APP覆盖升级兼容性测试平台</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet"
@@ -142,12 +142,15 @@
                     <div class="mb-4">
                         <label
                             style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">蒲公英链接下载</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="pgyerUrl" placeholder="请输入蒲公英链接 (https://www.pgyer.com/...)"
-                                style="flex: 1;">
-                            <button class="btn btn-primary" onclick="downloadPgyer()" id="btnPgyerDownload">
-                                <span class="material-symbols-outlined">download</span>
-                            </button>
+                        <div class="flex flex-col gap-2">
+                            <div class="flex gap-2">
+                                <input type="text" id="pgyerUrl" placeholder="请输入蒲公英链接 (https://www.pgyer.com/...)"
+                                    style="flex: 1;">
+                                <button class="btn btn-primary" onclick="downloadPgyer()" id="btnPgyerDownload">
+                                    <span class="material-symbols-outlined">download</span>
+                                </button>
+                            </div>
+                            <input type="text" id="pgyerRemark" placeholder="备注 (可选)" style="width: 100%;">
                         </div>
                         <!-- Progress Bar -->
                         <div id="pgyerProgress" style="display: none; margin-top: 10px;">

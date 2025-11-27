@@ -191,3 +191,27 @@ class ApkManager:
     def get_apk_path(self, filename):
         """Get the full path of an APK file."""
         return os.path.join(self.upload_dir, filename)
+
+    def register_file(self, filename, remark=None):
+        """Register an existing file (e.g. downloaded) into metadata."""
+        file_path = os.path.join(self.upload_dir, filename)
+        if not os.path.exists(file_path):
+            return {"status": "error", "message": "File not found"}
+            
+        # Parse APK/IPA info
+        if filename.lower().endswith(".apk"):
+            version_name, version_code, package_name = self._parse_apk(file_path)
+        elif filename.lower().endswith(".ipa"):
+            version_name, version_code, package_name = self._parse_ipa(file_path)
+        else:
+            version_name, version_code, package_name = "Unknown", "Unknown", "Unknown"
+
+        self.metadata[filename] = {
+            "custom_name": remark if remark else "",
+            "version_name": str(version_name),
+            "version_code": str(version_code),
+            "package_name": package_name,
+            "upload_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        self._save_metadata()
+        return {"status": "success", "filename": filename}
