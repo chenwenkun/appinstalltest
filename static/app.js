@@ -488,9 +488,13 @@ async function deleteApk(filename) {
     }
 }
 
-function selectDevice(serial) {
+function selectDevice(serial, platform = 'android') {
     selectedDevice = serial;
-    document.getElementById('currentDeviceSerial').innerText = serial;
+    selectedPlatform = platform;
+
+    const displaySerial = `${serial} (${platform === 'ios' ? 'iOS' : 'Android'})`;
+    document.getElementById('currentDeviceSerial').innerText = displaySerial;
+
     refreshDevices(); // Re-render to highlight
 
     // Enable Test Card
@@ -506,7 +510,9 @@ function selectDevice(serial) {
     btn2.style.opacity = '0.5';
     btn2.style.cursor = 'not-allowed';
 
-    // Highlight row
+    // Update Options immediately
+    updateTestControlOptions();
+    // Also refresh APKs to ensure list is up to date
     refreshApks();
 }
 
