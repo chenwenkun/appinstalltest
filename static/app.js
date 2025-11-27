@@ -376,37 +376,43 @@ async function downloadPgyer() {
 }
 
 async function pollPgyerProgress(taskId) {
-    const res = await fetch(`${SERVER_API}/pgyer/progress/${taskId}`);
-    const data = await res.json();
+    const btn = document.getElementById('btnPgyerDownload');
+    const progressBar = document.getElementById('pgyerProgressBar');
+    const progressText = document.getElementById('pgyerProgressText');
+    const urlInput = document.getElementById('pgyerUrl');
 
-    if (data.percent !== undefined) {
-        progressBar.style.width = `${data.percent}%`;
-    }
-    if (data.message) {
-        progressText.textContent = data.message;
-    }
+    try {
+        const res = await fetch(`${SERVER_API}/pgyer/progress/${taskId}`);
+        const data = await res.json();
 
-    if (data.status === 'success') {
-        showToast(`下载成功: ${data.filename}`, 3000);
-        setButtonLoading(btn, false);
-        urlInput.value = '';
-        refreshApks();
-        setTimeout(() => {
+        if (data.percent !== undefined) {
+            progressBar.style.width = `${data.percent}%`;
+        }
+        if (data.message) {
+            progressText.textContent = data.message;
+        }
+
+        if (data.status === 'success') {
+            showToast(`下载成功: ${data.filename}`, 3000);
+            setButtonLoading(btn, false);
+            urlInput.value = '';
+            refreshApks();
+            setTimeout(() => {
+                document.getElementById('pgyerProgress').style.display = 'none';
+            }, 3000);
+        } else if (data.status === 'error') {
+            showToast(`下载失败: ${data.message}`, 5000);
+            setButtonLoading(btn, false);
             document.getElementById('pgyerProgress').style.display = 'none';
-        }, 3000);
-    } else if (data.status === 'error') {
-        showToast(`下载失败: ${data.message}`, 5000);
+        } else {
+            // Continue polling
+            setTimeout(() => pollPgyerProgress(taskId), 1000);
+        }
+    } catch (e) {
+        console.error("Polling error", e);
         setButtonLoading(btn, false);
         document.getElementById('pgyerProgress').style.display = 'none';
-    } else {
-        // Continue polling
-        setTimeout(() => pollPgyerProgress(taskId), 1000);
     }
-} catch (e) {
-    console.error("Polling error", e);
-    setButtonLoading(btn, false);
-    document.getElementById('pgyerProgress').style.display = 'none';
-}
 }
 
 async function uploadApk() {
