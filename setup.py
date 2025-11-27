@@ -5,16 +5,27 @@ with open("requirements.txt") as f:
 
 setup(
     name="appinstalltest",
-    version="0.1.3",
+    version="0.1.4",
     description="APK Compatibility Testing Platform",
     author="Chen Wenkun",
-    packages=find_packages(),
-    py_modules=["main", "apk_manager", "device_manager", "test_runner", "start_server", "pgyer_manager"],
-    install_requires=requirements,
+    packages=["appinstalltest_lib"],
+    package_data={
+        "appinstalltest_lib": ["static/*", "static/favicon.png", "static/style.css", "static/app.js", "static/index.html", "static/dashboard.html"]
+    },
     include_package_data=True,
+    install_requires=[
+        "fastapi",
+        "uvicorn",
+        "adbutils",
+        "loguru",
+        "python-multipart",
+        "pyaxmlparser",
+        "requests",
+        "tidevice"
+    ],
     entry_points={
         "console_scripts": [
-            "appinstalltest=start_server:main",
+            "appinstalltest=appinstalltest_lib.start_server:main",
         ],
     },
     classifiers=[
@@ -24,3 +35,4 @@ setup(
     ],
     python_requires=">=3.7",
 )
+```

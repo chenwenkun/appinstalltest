@@ -6,9 +6,9 @@ from pydantic import BaseModel
 from typing import List
 import uvicorn
 import os
-from device_manager import DeviceManager
-from apk_manager import ApkManager
-from test_runner import TestRunner
+from .device_manager import DeviceManager
+from .apk_manager import ApkManager
+from .test_runner import TestRunner
 
 app = FastAPI()
 
@@ -32,7 +32,7 @@ app.mount("/uploads", StaticFiles(directory="apks"), name="uploads")
 
 from fastapi.responses import RedirectResponse
 
-from pgyer_manager import PgyerManager
+from .pgyer_manager import PgyerManager
 
 
 

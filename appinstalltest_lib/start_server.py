@@ -1,5 +1,5 @@
 import uvicorn
-from main import app
+from .main import app
 import os
 import sys
 
