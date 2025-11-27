@@ -187,9 +187,14 @@ class TestRunner:
         if apk_url:
             import requests
             import tempfile
-            logger.info(f"Downloading APK from {apk_url}...")
+            logger.info(f"Downloading file from {apk_url}...")
             try:
-                fd, temp_path = tempfile.mkstemp(suffix=".apk") # Should check extension based on URL?
+                # Determine suffix
+                suffix = ".apk"
+                if ".ipa" in apk_url.lower():
+                    suffix = ".ipa"
+                
+                fd, temp_path = tempfile.mkstemp(suffix=suffix)
                 os.close(fd)
                 with requests.get(apk_url, stream=True) as r:
                     r.raise_for_status()
@@ -198,6 +203,7 @@ class TestRunner:
                             f.write(chunk)
                 return temp_path, True
             except Exception as e:
+                raise Exception(f"Failed to download file: {e}")
                 raise Exception(f"Failed to download APK: {e}")
         elif apk_name:
             apk_path = os.path.join("apks", apk_name)
