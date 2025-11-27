@@ -6,8 +6,9 @@ from urllib.parse import unquote
 from loguru import logger
 
 class PgyerManager:
-    def __init__(self, download_dir="apks"):
+    def __init__(self, download_dir="apks", apk_manager=None):
         self.download_dir = download_dir
+        self.apk_manager = apk_manager
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
         self.progress = {}
@@ -31,7 +32,7 @@ class PgyerManager:
             c += hex(ord(char))[2:].zfill(2)
         return c
 
-    def download_app(self, url, task_id):
+    def download_app(self, url, task_id, remark=None):
         """
         Download app from Pgyer URL.
         Returns: {"status": "success/error", "message": "...", "filename": "..."}
@@ -131,7 +132,12 @@ class PgyerManager:
                  return {"status": "error", "message": "Could not find download URL."}
 
             # Download the file
-            return self.download_file(download_url, task_id)
+            result = self.download_file(download_url, task_id)
+            
+            if result["status"] == "success" and self.apk_manager:
+                self.apk_manager.register_file(result["filename"], remark)
+                
+            return result
 
         except Exception as e:
             logger.error(f"Pgyer download failed: {e}")

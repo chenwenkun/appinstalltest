@@ -57,7 +57,7 @@ def get_pgyer_progress(task_id: str):
 device_manager = DeviceManager()
 apk_manager = ApkManager("apks")
 test_runner = TestRunner(device_manager)
-pgyer_manager = PgyerManager("apks")
+pgyer_manager = PgyerManager("apks", apk_manager)
 
 @app.get("/")
 async def root():
@@ -84,11 +84,12 @@ async def upload_apk(
 @app.post("/pgyer/download")
 async def pgyer_download(background_tasks: BackgroundTasks, item: dict = Body(...)):
     url = item.get("url")
+    remark = item.get("remark")
     if not url:
         return {"status": "error", "message": "Missing URL"}
     
     task_id = str(uuid.uuid4())
-    background_tasks.add_task(pgyer_manager.download_app, url, task_id)
+    background_tasks.add_task(pgyer_manager.download_app, url, task_id, remark)
     
     return {"status": "started", "task_id": task_id}
 

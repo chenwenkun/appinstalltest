@@ -336,6 +336,7 @@ async function refreshApks() {
 
 async function downloadPgyer() {
     const urlInput = document.getElementById('pgyerUrl');
+    const remarkInput = document.getElementById('pgyerRemark');
     const btn = document.getElementById('btnPgyerDownload');
     const progressDiv = document.getElementById('pgyerProgress');
     const progressBar = document.getElementById('pgyerProgressBar');
@@ -357,7 +358,10 @@ async function downloadPgyer() {
         const res = await fetch(`${SERVER_API}/pgyer/download`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: url })
+            body: JSON.stringify({
+                url: url,
+                remark: remarkInput ? remarkInput.value : ""
+            })
         });
 
         const result = await res.json();
