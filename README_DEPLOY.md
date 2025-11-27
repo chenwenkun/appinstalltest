@@ -104,3 +104,21 @@ pip install dist/appinstalltest-0.1.0-py3-none-any.whl
 pip install twine
 twine upload dist/*
 ```
+
+## 4. 版本更新与发布
+
+当您修改了代码并希望发布新版本时：
+
+1.  **修改版本号**：打开 `setup.py`，修改 `version` 字段（例如 `0.1.0` -> `0.1.1`）。
+2.  **清理旧构建**（可选）：
+    ```bash
+    rm -rf dist/ build/ *.egg-info
+    ```
+3.  **重新打包**：
+    ```bash
+    python setup.py sdist bdist_wheel
+    ```
+4.  **上传新版本**：
+    ```bash
+    twine upload dist/*
+    ```
