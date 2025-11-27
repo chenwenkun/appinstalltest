@@ -99,7 +99,8 @@ class TestRunner:
                  return {"status": "failed", "reason": "New APK file not found."}
 
             # Verify package name
-            new_pkg, new_ver, new_code = self.apk_manager._parse_apk(new_apk_path)
+            # Verify package name
+            new_ver, new_code, new_pkg = self.apk_manager._parse_apk(new_apk_path)
             if new_pkg != "Unknown" and new_pkg != package_name:
                 return {"status": "failed", "reason": f"Package name mismatch! Old: {package_name}, New: {new_pkg}"}
 
