@@ -1,5 +1,5 @@
-let API_BASE = ""; // Default to relative if served locally, or we will override it
-const LOCAL_API = ""; // Use relative path
+// API Configuration
+const LOCAL_API = "http://127.0.0.1:8791";
 const SERVER_API = window.location.origin;
 let selectedDevice = null;
 let currentPackageName = null;
@@ -12,10 +12,8 @@ const connectionStatusEl = document.getElementById('connectionStatus');
 
 async function checkLocalService() {
     try {
-        // Try to fetch version or devices from local service
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1000); // 1s timeout
-
+        const timeoutId = setTimeout(() => controller.abort(), 1000);
         const res = await fetch(`${LOCAL_API}/devices`, { signal: controller.signal });
         clearTimeout(timeoutId);
 
@@ -23,7 +21,6 @@ async function checkLocalService() {
             if (!isLocalConnected) {
                 console.log("Connected to local service!");
                 isLocalConnected = true;
-                API_BASE = LOCAL_API;
                 updateClientInfo(true);
                 refreshDevices();
             }
@@ -36,9 +33,8 @@ async function checkLocalService() {
     if (isLocalConnected) {
         console.log("Lost connection to local service");
         isLocalConnected = false;
-        API_BASE = ""; // Revert to server or empty
         updateClientInfo(false);
-        refreshDevices(); // Clear or show server devices
+        refreshDevices();
     }
     return false;
 }
@@ -322,7 +318,7 @@ function updateTestControlOptions() {
 
 async function refreshApks() {
     try {
-        const res = await fetch(`${LOCAL_API}/apks`);
+        const res = await fetch(`${SERVER_API}/apks`);
         if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data)) { // Old format, assume android
@@ -358,7 +354,7 @@ async function downloadPgyer() {
     progressText.textContent = '准备下载...';
 
     try {
-        const res = await fetch(`${LOCAL_API}/pgyer/download`, {
+        const res = await fetch(`${SERVER_API}/pgyer/download`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url: url })
@@ -380,43 +376,37 @@ async function downloadPgyer() {
 }
 
 async function pollPgyerProgress(taskId) {
-    const btn = document.getElementById('btnPgyerDownload');
-    const progressBar = document.getElementById('pgyerProgressBar');
-    const progressText = document.getElementById('pgyerProgressText');
-    const urlInput = document.getElementById('pgyerUrl');
+    const res = await fetch(`${SERVER_API}/pgyer/progress/${taskId}`);
+    const data = await res.json();
 
-    try {
-        const res = await fetch(`${LOCAL_API}/pgyer/progress/${taskId}`);
-        const data = await res.json();
+    if (data.percent !== undefined) {
+        progressBar.style.width = `${data.percent}%`;
+    }
+    if (data.message) {
+        progressText.textContent = data.message;
+    }
 
-        if (data.percent !== undefined) {
-            progressBar.style.width = `${data.percent}%`;
-        }
-        if (data.message) {
-            progressText.textContent = data.message;
-        }
-
-        if (data.status === 'success') {
-            showToast(`下载成功: ${data.filename}`, 3000);
-            setButtonLoading(btn, false);
-            urlInput.value = '';
-            refreshApks();
-            setTimeout(() => {
-                document.getElementById('pgyerProgress').style.display = 'none';
-            }, 3000);
-        } else if (data.status === 'error') {
-            showToast(`下载失败: ${data.message}`, 5000);
-            setButtonLoading(btn, false);
+    if (data.status === 'success') {
+        showToast(`下载成功: ${data.filename}`, 3000);
+        setButtonLoading(btn, false);
+        urlInput.value = '';
+        refreshApks();
+        setTimeout(() => {
             document.getElementById('pgyerProgress').style.display = 'none';
-        } else {
-            // Continue polling
-            setTimeout(() => pollPgyerProgress(taskId), 1000);
-        }
-    } catch (e) {
-        console.error("Polling error", e);
+        }, 3000);
+    } else if (data.status === 'error') {
+        showToast(`下载失败: ${data.message}`, 5000);
         setButtonLoading(btn, false);
         document.getElementById('pgyerProgress').style.display = 'none';
+    } else {
+        // Continue polling
+        setTimeout(() => pollPgyerProgress(taskId), 1000);
     }
+} catch (e) {
+    console.error("Polling error", e);
+    setButtonLoading(btn, false);
+    document.getElementById('pgyerProgress').style.display = 'none';
+}
 }
 
 async function uploadApk() {
