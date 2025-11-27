@@ -1,15 +1,69 @@
-# 部署与安装指南
+# App 覆盖升级兼容性测试平台 (Android/iOS)
 
-本指南介绍如何将 APK 兼容性测试平台作为 Docker 服务部署，或作为 Python 包安装。
+本平台用于自动化测试 App 的覆盖升级场景，支持 Android (APK) 和 iOS (IPA) 双端。
 
-## 1. Docker 部署 (服务端)
+## ✨ 功能特性
 
-适用于在服务器上部署，提供 Web 界面和 APK 管理功能。
-注意：Docker 容器内默认无法直接访问宿主机的 USB 设备。若需连接设备，建议使用远程 ADB 或以特权模式运行。
+*   **双端支持**：同时支持 Android 设备 (通过 ADB) 和 iOS 设备 (通过 tidevice)。
+*   **远程下载**：集成蒲公英 (Pgyer) 下载功能，支持自动解析和下载 APK/IPA。
+*   **文件管理**：统一管理上传的安装包，支持自动解析版本信息 (包名、版本号)。
+*   **自动化测试**：一键执行 "安装旧版 -> 启动 -> 覆盖安装新版 -> 验证" 的完整测试流程。
+*   **智能交互**：
+    *   自动识别设备平台 (Android/iOS)。
+    *   下载失败自动清理，防止无效文件残留。
+    *   支持为下载文件添加备注。
+
+## 🛠️ 环境要求
+
+*   Python 3.8+
+*   **Android**: 需安装 ADB (Android Debug Bridge) 并配置环境变量。
+*   **iOS**: 需安装 [tidevice](https://github.com/alibaba/taobao-iphone-device) (已包含在 requirements.txt 中) 和 iTunes (Windows) 或 Xcode (Mac)。
+
+## 🚀 快速开始
+
+### 1. 本地运行 (推荐)
+
+适用于直接连接 USB 设备进行测试。
+
+1.  **克隆代码**
+    ```bash
+    git clone https://github.com/chenwenkun/appinstalltest.git
+    cd appinstalltest
+    ```
+
+2.  **安装依赖**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **启动服务**
+    ```bash
+    python main.py
+    ```
+
+4.  **访问平台**
+    浏览器访问 `http://127.0.0.1:8791`。
+
+### 2. 使用指南
+
+1.  **连接设备**：通过 USB 连接 Android 或 iOS 设备，确保已开启调试模式。
+2.  **选择设备**：在“设备列表”中点击“选择”按钮，选中目标测试设备。
+3.  **准备安装包**：
+    *   **上传**：直接拖拽 APK/IPA 文件到上传区域。
+    *   **下载**：输入蒲公英链接 (Pgyer)，可选择填写备注，点击下载。
+4.  **执行测试**：
+    *   在“测试控制”区域选择“旧版本”和“新版本”安装包。
+    *   点击“安装旧版”，等待安装完成。
+    *   点击“覆盖新版”，观察覆盖安装结果。
+
+---
+
+## 🐳 Docker 部署 (服务端)
+
+适用于在服务器上部署，提供 Web 界面和文件管理功能。
+**注意**：Docker 容器内默认无法直接访问宿主机的 USB 设备。若需连接设备，建议使用远程 ADB 或以特权模式运行。
 
 ### 构建镜像
-
-在项目根目录下运行：
 
 ```bash
 docker build -t appinstalltest .
@@ -21,18 +75,14 @@ docker build -t appinstalltest .
 docker run -d -p 8791:8791 --restart always --name appinstalltest appinstalltest
 ```
 
-访问地址：`http://localhost:8791`
-
-若需挂载宿主机 USB 设备（Linux）：
+若需挂载宿主机 USB 设备 (Linux)：
 ```bash
 docker run -d -p 8791:8791 --restart always --privileged -v /dev/bus/usb:/dev/bus/usb --name appinstalltest appinstalltest
 ```
 
 ---
 
-## 2. PyPI 安装 (客户端/本地工具)
-
-适用于在本地电脑上安装，直接控制连接的 USB 设备。
+## 📦 PyPI 打包与发布
 
 ### 打包
 
@@ -48,37 +98,9 @@ python setup.py sdist bdist_wheel
 pip install dist/appinstalltest-0.1.0-py3-none-any.whl
 ```
 
-### 运行
-
-安装完成后，在终端直接运行以下命令启动服务：
+### 发布到 PyPI
 
 ```bash
-appinstalltest
-```
-
-服务启动后，浏览器访问 `http://localhost:8791` 即可使用。
-
----
-
-## 3. 发布到 PyPI
-
-如果您想将包发布到 PyPI 供他人下载，请按以下步骤操作：
-
-### 准备工作
-
-1.  注册 [PyPI](https://pypi.org/) 账号。
-2.  安装上传工具 `twine`：
-    ```bash
-    pip install twine
-    ```
-
-### 上传
-
-在项目根目录下运行：
-
-```bash
+pip install twine
 twine upload dist/*
 ```
-
-系统会提示输入 PyPI 的用户名和密码（或 API Token）。上传成功后，其他人即可通过 `pip install appinstalltest` 安装您的工具。
-
