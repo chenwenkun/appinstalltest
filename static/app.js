@@ -298,8 +298,8 @@ function updateTestControlOptions() {
         if (newLabel) newLabel.textContent = "新版本 App (IPA)";
     } else {
         files = allFiles.android || [];
-        if (oldLabel) oldLabel.textContent = "旧版本 APK";
-        if (newLabel) newLabel.textContent = "新版本 APK";
+        if (oldLabel) oldLabel.textContent = "旧版本 App (APK)";
+        if (newLabel) newLabel.textContent = "新版本 App (APK)";
     }
 
     files.forEach(f => {
